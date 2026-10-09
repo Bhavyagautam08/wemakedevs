@@ -39,6 +39,9 @@ from src.model.evaluation import (
 from tests.test_evaluation import run_evaluation_demo
 
 
+from src.data_sources import NasaFirmsClient, OpenMeteoClient, OpenAqWaqiClient, OsmSchoolClient
+
+
 class DhuanAlertService:
     """
     Central service interface for all DhuanAlert platform capabilities.
@@ -54,28 +57,29 @@ class DhuanAlertService:
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_dir = os.path.join(base_dir, "data")
+        self.firms_client = NasaFirmsClient()
+        self.weather_client = OpenMeteoClient()
+        self.openaq_client = OpenAqWaqiClient()
+        self.schools_client = OsmSchoolClient()
 
     # =========================================================================
-    # Reference Datasets
+    # Reference Datasets & Ingestion
     # =========================================================================
 
     def get_sample_fires(self) -> List[Hotspot]:
-        path = os.path.join(self.data_dir, "sample_fires.json")
-        with open(path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        return [Hotspot(**item) for item in raw]
+        return self.firms_client.load_fallback_fires()
 
     def get_sample_weather(self) -> List[WeatherObservation]:
-        path = os.path.join(self.data_dir, "sample_weather.json")
-        with open(path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        return [WeatherObservation(**item) for item in raw]
+        return self.weather_client.load_fallback_weather()
 
     def get_sample_schools(self) -> List[School]:
-        path = os.path.join(self.data_dir, "ncr_schools.json")
-        with open(path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        return [School(**item) for item in raw]
+        return self.schools_client.load_ncr_schools()
+
+    def get_live_fires(self) -> List[Hotspot]:
+        return self.firms_client.fetch_active_fires()
+
+    def get_live_weather(self) -> List[WeatherObservation]:
+        return self.weather_client.fetch_forecast()
 
     def get_grap_catalog(self) -> Dict[str, Any]:
         catalog = {}
@@ -106,13 +110,19 @@ class DhuanAlertService:
     ) -> Dict[str, Any]:
         """
         Executes complete forecast pipeline and computes evaluation matrix.
+        Supports 'replay' (bundled snapshot), 'live' (NASA FIRMS + Open-Meteo), or 'custom'.
         """
-        if mode == "replay" or not hotspots:
-            hotspots = self.get_sample_fires()
-        if mode == "replay" or not weather:
-            weather = self.get_sample_weather()
-        if mode == "replay" or not schools:
-            schools = self.get_sample_schools()
+        if mode == "live":
+            hotspots = hotspots or self.get_live_fires()
+            weather = weather or self.get_live_weather()
+            schools = schools or self.get_sample_schools()
+        else:
+            if not hotspots:
+                hotspots = self.get_sample_fires()
+            if not weather:
+                weather = self.get_sample_weather()
+            if not schools:
+                schools = self.get_sample_schools()
 
         now = run_timestamp or datetime.now(timezone.utc)
         payload: FrontendPayload = self.pipeline.run(

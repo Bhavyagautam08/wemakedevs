@@ -5,6 +5,7 @@ import { useTimelineSlider } from "./hooks/useTimelineSlider";
 import { useSchoolRiskFilter } from "./hooks/useSchoolRiskFilter";
 import { Header } from "./components/Header";
 import { AdvisoryBanner } from "./components/AdvisoryBanner";
+import { PlumeMap } from "./components/PlumeMap";
 import { TimelineSliderControl } from "./components/TimelineSliderControl";
 import { SchoolRiskTable } from "./components/SchoolRiskTable";
 import { EvaluationReportCard } from "./components/EvaluationReportCard";
@@ -43,6 +44,14 @@ export function App() {
     });
   };
 
+  const handleSelectHorizon = (hours: number) => {
+    if (!data?.prediction.timeline) return;
+    const idx = data.prediction.timeline.findIndex((s) => s.horizon_offset_hours === hours);
+    if (idx !== -1) {
+      setCurrentStep(idx);
+    }
+  };
+
   return (
     <div className="app-layout">
       <Header
@@ -76,6 +85,15 @@ export function App() {
             <AdvisoryBanner
               advisory={data.advisory}
               onReview={handleReview}
+            />
+
+            {/* Interactive Leaflet Plume Heatmap & Corridor Map */}
+            <PlumeMap
+              prediction={data.prediction}
+              currentSlice={currentSlice}
+              schools={data.prediction.schools}
+              currentStep={currentStep}
+              onSelectHorizon={handleSelectHorizon}
             />
 
             {/* Middle Section: Timeline Animation + School Risk Table */}

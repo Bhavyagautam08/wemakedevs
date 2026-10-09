@@ -70,6 +70,8 @@ class SchoolRiskAssessment(BaseModel):
     school_id: str
     name: str
     district: str
+    latitude: float = 28.6139
+    longitude: float = 77.2090
     distance_to_fire_km: float
     predicted_arrival_time: Optional[datetime] = None
     peak_concentration: float
@@ -107,6 +109,9 @@ class TimelineSlice(BaseModel):
     affected_schools_count: int
     max_intensity: float
     contour_geojson: Dict[str, Any]
+    scatter_points: List[List[float]] = []  # [[lat, lon, weight], ...]
+    corridor_geojson: Optional[Dict[str, Any]] = None
+    heatmap_levels: Optional[List[Dict[str, Any]]] = None
 
 
 class PredictiveOutput(BaseModel):

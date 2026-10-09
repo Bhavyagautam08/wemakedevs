@@ -97,6 +97,8 @@ class SchoolRiskScorer:
                     school_id=s.school_id,
                     name=s.name,
                     district=s.district,
+                    latitude=s.latitude,
+                    longitude=s.longitude,
                     distance_to_fire_km=dist_km,
                     predicted_arrival_time=arrival_time,
                     peak_concentration=round(peak_c, 3),

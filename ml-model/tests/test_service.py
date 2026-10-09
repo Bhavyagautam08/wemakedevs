@@ -27,7 +27,8 @@ def test_reference_data_loading(service):
 def test_layer1_simulation(service):
     pred: PredictiveOutput = service.simulate_layer1()
     assert pred.prediction_id.startswith("pred_")
-    assert len(pred.timeline) == 7
+    assert len(pred.timeline) >= 7
+    assert len(pred.timeline[0].scatter_points) > 0
     assert len(pred.schools) > 0
     assert pred.ensemble.member_count == 3
     assert pred.map_geojson["type"] == "FeatureCollection"

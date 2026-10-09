@@ -619,3 +619,262 @@ body {
   border-top: 1px solid #1e293b;
   padding-top: 0.5rem;
 }
+
+/* ==========================================================================
+   Plume Map & Spatial Layers
+   ========================================================================== */
+.plume-map-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  position: relative;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.map-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background-color: #0f172a;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.map-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.live-pulse {
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.horizon-pills {
+  display: flex;
+  gap: 0.35rem;
+  background: #1e293b;
+  padding: 0.2rem 0.3rem;
+  border-radius: 9999px;
+}
+
+.horizon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.horizon-btn:hover {
+  color: var(--text-main);
+}
+
+.horizon-btn.active {
+  background: var(--accent-primary);
+  color: #0b0f19;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
+}
+
+.layer-toggles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toggle-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #1e293b;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.toggle-chip:hover {
+  background: #334155;
+  color: var(--text-main);
+}
+
+.toggle-chip input[type="checkbox"] {
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.map-canvas-container {
+  z-index: 1;
+}
+
+.map-telemetry-overlay {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.telemetry-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+}
+
+.telemetry-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.telemetry-item .label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.telemetry-item .value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.telemetry-item .value.highlight {
+  color: var(--accent-primary);
+}
+
+.telemetry-item .value.text-warning {
+  color: var(--risk-high);
+}
+
+/* Custom Marker Styles */
+.fire-pulse-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.85);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.9);
+  position: relative;
+}
+
+.fire-emoji {
+  font-size: 16px;
+}
+
+.school-pin-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.school-emoji {
+  font-size: 13px;
+}
+
+/* Custom Leaflet Popups */
+.leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-tip {
+  background: #0f172a !important;
+}
+
+.map-popup {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.map-popup .popup-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-primary);
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 0.2rem;
+}
+
+.map-popup .popup-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.2rem 0;
+}
+
+.map-popup .popup-row span {
+  color: var(--text-muted);
+}
+
+.map-popup .popup-tag {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.fire-popup .popup-tag {
+  background: #ef4444;
+  color: #fff;
+}
+

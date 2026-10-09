@@ -21,6 +21,8 @@ export interface SchoolRiskAssessment {
   school_id: string;
   name: string;
   district: string;
+  latitude?: number;
+  longitude?: number;
   distance_to_fire_km: number;
   predicted_arrival_time?: string | null;
   peak_concentration: number;
@@ -41,6 +43,14 @@ export interface TimelineSlice {
   affected_schools_count: number;
   max_intensity: number;
   contour_geojson?: any;
+  scatter_points?: Array<[number, number, number]>; // [lat, lon, weight]
+  corridor_geojson?: any;
+  heatmap_levels?: Array<{
+    level: string;
+    intensity: string;
+    color: string;
+    coordinates: number[][];
+  }>;
 }
 
 export interface PredictiveOutput {

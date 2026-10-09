@@ -4,6 +4,7 @@ Orchestrates raw data ingestion, fire source estimation, 2D Lagrangian ensemble 
 school risk scoring, map GeoJSON synthesis, and timeline slice generation.
 """
 
+import math
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
 import numpy as np
@@ -167,7 +168,7 @@ class Layer1PredictivePipeline:
         weather_point: WeatherObservation,
         assessed_schools: List[SchoolRiskAssessment],
     ) -> List[TimelineSlice]:
-        """Builds hourly animation steps for frontend slider (T+0 to T+6h)."""
+        """Builds multi-horizon animation steps for frontend map slider (T+0 to T+24h)."""
         slices = []
         f_lat = primary_fire.centroid_lat if primary_fire else 30.2
         f_lon = primary_fire.centroid_lon if primary_fire else 75.8
@@ -176,17 +177,76 @@ class Layer1PredictivePipeline:
         dx_deg_per_hr = (weather_point.u_mps * 3600.0) / 96000.0
         dy_deg_per_hr = (weather_point.v_mps * 3600.0) / 111139.0
 
-        for h in [0, 1, 2, 3, 4, 5, 6]:
+        # Trajectory path coordinates from origin
+        corridor_coords = [[f_lon, f_lat]]
+
+        horizons = [0, 1, 2, 3, 4, 5, 6, 12, 24]
+        for h in horizons:
             t_slice = now + timedelta(hours=h)
             center_lat = round(f_lat + (dy_deg_per_hr * h), 4)
             center_lon = round(f_lon + (dx_deg_per_hr * h), 4)
-            area_sq_km = round(150.0 + (h * 420.0), 1)
+            corridor_coords.append([center_lon, center_lat])
+
+            # Spatial spread expands with time: sigma ~ sqrt(2 * K * t)
+            spread_deg = max(0.12, 0.10 + (h * 0.045))
+            area_sq_km = round(150.0 + (h * 380.0), 1)
 
             # Count schools hit up to this hour
             aff_count = sum(
                 1 for s in assessed_schools
                 if s.predicted_arrival_time and s.predicted_arrival_time <= t_slice
             )
+
+            # Generate synthetic particle scatter cloud for map rendering
+            scatter = []
+            np.random.seed(42 + h)
+            n_scatter = 35 if h == 0 else 55
+            for _ in range(n_scatter):
+                p_lat = round(float(np.random.normal(center_lat, spread_deg * 0.45)), 4)
+                p_lon = round(float(np.random.normal(center_lon, spread_deg * 0.55)), 4)
+                dist_norm = math.sqrt(((p_lat - center_lat) / spread_deg) ** 2 + ((p_lon - center_lon) / spread_deg) ** 2)
+                intensity = round(max(0.1, (1.0 - (dist_norm * 0.6)) * max(0.2, 1.0 - (h * 0.03))), 2)
+                scatter.append([p_lat, p_lon, intensity])
+
+            # Multi-level heatmap polygons (High/Core, Moderate, Low/Fringe)
+            heatmap_levels = [
+                {
+                    "level": "core",
+                    "intensity": "high",
+                    "color": "#ef4444",
+                    "coordinates": [
+                        [center_lon - spread_deg * 0.35, center_lat - spread_deg * 0.3],
+                        [center_lon + spread_deg * 0.35, center_lat - spread_deg * 0.3],
+                        [center_lon + spread_deg * 0.35, center_lat + spread_deg * 0.3],
+                        [center_lon - spread_deg * 0.35, center_lat + spread_deg * 0.3],
+                        [center_lon - spread_deg * 0.35, center_lat - spread_deg * 0.3],
+                    ],
+                },
+                {
+                    "level": "dispersing",
+                    "intensity": "moderate",
+                    "color": "#f97316",
+                    "coordinates": [
+                        [center_lon - spread_deg * 0.75, center_lat - spread_deg * 0.65],
+                        [center_lon + spread_deg * 0.75, center_lat - spread_deg * 0.65],
+                        [center_lon + spread_deg * 0.75, center_lat + spread_deg * 0.65],
+                        [center_lon - spread_deg * 0.75, center_lat + spread_deg * 0.65],
+                        [center_lon - spread_deg * 0.75, center_lat - spread_deg * 0.65],
+                    ],
+                },
+                {
+                    "level": "fringe",
+                    "intensity": "low",
+                    "color": "#eab308",
+                    "coordinates": [
+                        [center_lon - spread_deg * 1.2, center_lat - spread_deg * 1.0],
+                        [center_lon + spread_deg * 1.2, center_lat - spread_deg * 1.0],
+                        [center_lon + spread_deg * 1.2, center_lat + spread_deg * 1.0],
+                        [center_lon - spread_deg * 1.2, center_lat + spread_deg * 1.0],
+                        [center_lon - spread_deg * 1.2, center_lat - spread_deg * 1.0],
+                    ],
+                },
+            ]
 
             slices.append(
                 TimelineSlice(
@@ -196,18 +256,16 @@ class Layer1PredictivePipeline:
                     plume_center_lon=center_lon,
                     plume_area_sq_km=area_sq_km,
                     affected_schools_count=aff_count,
-                    max_intensity=round(max(0.2, 1.0 - (h * 0.06)), 2),
+                    max_intensity=round(max(0.2, 1.0 - (h * 0.035)), 2),
                     contour_geojson={
                         "type": "Polygon",
-                        "coordinates": [
-                            [
-                                [center_lon - 0.2, center_lat - 0.2],
-                                [center_lon + 0.2, center_lat - 0.2],
-                                [center_lon + 0.2, center_lat + 0.2],
-                                [center_lon - 0.2, center_lat + 0.2],
-                                [center_lon - 0.2, center_lat - 0.2],
-                            ]
-                        ],
+                        "coordinates": [heatmap_levels[1]["coordinates"]],
+                    },
+                    scatter_points=scatter,
+                    heatmap_levels=heatmap_levels,
+                    corridor_geojson={
+                        "type": "LineString",
+                        "coordinates": corridor_coords.copy(),
                     },
                 )
             )
@@ -252,17 +310,14 @@ class Layer1PredictivePipeline:
                 },
             })
 
-        # 3. School Pins
+        # 3. School Pins with exact geocoordinates
         for s in assessed_schools:
             features.append({
                 "type": "Feature",
                 "id": s.school_id,
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [
-                        self.projection.origin_lon + 0.6,  # Normalized demo position
-                        self.projection.origin_lat - 0.7,
-                    ],
+                    "coordinates": [s.longitude, s.latitude],
                 },
                 "properties": {
                     "layer_type": "school_pin",
@@ -271,6 +326,7 @@ class Layer1PredictivePipeline:
                     "risk_band": s.risk_band,
                     "risk_score": s.risk_score,
                     "impact_probability": s.impact_probability,
+                    "predicted_arrival_time": s.predicted_arrival_time.isoformat() if s.predicted_arrival_time else None,
                 },
             })
 

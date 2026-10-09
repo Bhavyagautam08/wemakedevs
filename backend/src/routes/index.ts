@@ -18,9 +18,19 @@ apiRouter.get("/health", (req, res) => {
   });
 });
 
+import { AwsService } from "../services/aws.service";
+
 // Mounted v1 routes
 apiRouter.use("/v1", runsRouter);
 apiRouter.use("/v1", advisoriesRouter);
 apiRouter.use("/v1", policyRouter);
 apiRouter.use("/v1", evaluationRouter);
 apiRouter.use("/v1", dataRouter);
+
+// AWS Integration & Deployment status
+apiRouter.get("/v1/aws/status", (req, res) => {
+  res.status(200).json({
+    configured: AwsService.isAwsConfigured(),
+    deployment: AwsService.getDeploymentConfig(),
+  });
+});
