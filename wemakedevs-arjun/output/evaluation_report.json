@@ -1,0 +1,19 @@
+{
+  "evaluation_id": "eval_backtest_2024_peak_nw",
+  "generated_at": "2026-10-09T12:59:51.470907Z",
+  "dataset_period": "15 Oct - 30 Nov Historical NW Stubble Events",
+  "station_count": 4,
+  "sample_points": 48,
+  "median_arrival_lag_hours": 1.0,
+  "mean_absolute_lag_hours": 1.0,
+  "spearman_rho": 0.989,
+  "pearson_r": 0.86,
+  "contingency": {
+    "hits": 22,
+    "misses": 0,
+    "false_alarms": 4,
+    "correct_negatives": 22
+  },
+  "envelope_capture_rate": 1.0,
+  "operational_verdict": "VALIDATED: Smoke transport model exhibits strong predictive skill with genuine lead-time advantage."
+}

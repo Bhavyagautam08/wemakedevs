@@ -1,0 +1,47 @@
+[
+  {
+    "detection_id": "viirs_snpp_20261008_01",
+    "latitude": 30.245,
+    "longitude": 75.842,
+    "acq_timestamp": "2026-10-08T20:30:00Z",
+    "confidence": 92.0,
+    "frp": 142.5,
+    "satellite": "VIIRS_SNPP_NRT"
+  },
+  {
+    "detection_id": "viirs_snpp_20261008_02",
+    "latitude": 30.261,
+    "longitude": 75.865,
+    "acq_timestamp": "2026-10-08T20:30:00Z",
+    "confidence": 88.0,
+    "frp": 210.0,
+    "satellite": "VIIRS_SNPP_NRT"
+  },
+  {
+    "detection_id": "viirs_snpp_20261008_03",
+    "latitude": 30.231,
+    "longitude": 75.819,
+    "acq_timestamp": "2026-10-08T20:30:00Z",
+    "confidence": 95.0,
+    "frp": 380.2,
+    "satellite": "VIIRS_SNPP_NRT"
+  },
+  {
+    "detection_id": "viirs_noaa20_20261008_04",
+    "latitude": 30.312,
+    "longitude": 75.954,
+    "acq_timestamp": "2026-10-08T20:45:00Z",
+    "confidence": 84.0,
+    "frp": 165.8,
+    "satellite": "VIIRS_NOAA20_NRT"
+  },
+  {
+    "detection_id": "viirs_noaa20_20261008_05",
+    "latitude": 30.198,
+    "longitude": 75.782,
+    "acq_timestamp": "2026-10-08T20:45:00Z",
+    "confidence": 90.0,
+    "frp": 290.4,
+    "satellite": "VIIRS_NOAA20_NRT"
+  }
+]

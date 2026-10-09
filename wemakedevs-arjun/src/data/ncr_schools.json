@@ -1,0 +1,50 @@
+[
+  {
+    "school_id": "sch_dl_narela_001",
+    "name": "Govt Boys Senior Secondary School Narela",
+    "latitude": 28.852,
+    "longitude": 77.098,
+    "district": "North West Delhi",
+    "state": "Delhi"
+  },
+  {
+    "school_id": "sch_dl_bawana_002",
+    "name": "Sarvodaya Kanya Vidyalaya Bawana",
+    "latitude": 28.798,
+    "longitude": 77.034,
+    "district": "North West Delhi",
+    "state": "Delhi"
+  },
+  {
+    "school_id": "sch_dl_rohini_003",
+    "name": "Delhi Public School Rohini Sector 24",
+    "latitude": 28.721,
+    "longitude": 77.108,
+    "district": "North West Delhi",
+    "state": "Delhi"
+  },
+  {
+    "school_id": "sch_dl_pitampura_004",
+    "name": "Bal Bharati Public School Pitampura",
+    "latitude": 28.698,
+    "longitude": 77.132,
+    "district": "North West Delhi",
+    "state": "Delhi"
+  },
+  {
+    "school_id": "sch_hr_gurugram_005",
+    "name": "The Heritage School Gurugram Sector 62",
+    "latitude": 28.412,
+    "longitude": 77.085,
+    "district": "Gurugram",
+    "state": "Haryana"
+  },
+  {
+    "school_id": "sch_up_noida_006",
+    "name": "Amity International School Sector 44 Noida",
+    "latitude": 28.552,
+    "longitude": 77.338,
+    "district": "Gautam Buddh Nagar",
+    "state": "Uttar Pradesh"
+  }
+]

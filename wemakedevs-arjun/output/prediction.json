@@ -1,0 +1,638 @@
+{
+  "prediction_id": "pred_20261008_2200_delhincr",
+  "generated_at": "2026-10-08T22:00:00Z",
+  "valid_from": "2026-10-08T22:00:00Z",
+  "valid_until": "2026-10-09T04:00:00Z",
+  "model": {
+    "type": "lagrangian_smoke_transport_2d",
+    "version": "1.0.0",
+    "mode": "physics_only"
+  },
+  "fire": {
+    "fire_id": "fire_cluster_001",
+    "latitude": 30.2338,
+    "longitude": 75.827,
+    "hotspot_count": 4,
+    "total_frp_mw": 1023.1,
+    "source_strength": 0.524,
+    "source_freshness_hours": 1.25,
+    "status": "ACTIVE"
+  },
+  "weather": {
+    "wind_speed_mps": 4.8,
+    "wind_direction_deg": 310.0,
+    "u_mps": 3.67,
+    "v_mps": -3.08,
+    "boundary_layer_height_m": 340.0,
+    "temperature_c": 23.5
+  },
+  "simulation": {
+    "timestep_seconds": 900,
+    "horizon_hours": 6,
+    "particle_count": 611,
+    "diffusion_kx": 250.0,
+    "diffusion_ky": 250.0,
+    "decay_rate": 0.000032
+  },
+  "ensemble": {
+    "member_count": 3,
+    "members": [
+      {
+        "member_id": "member_1",
+        "name": "Lower Wind / East Drift / Reduced Emissions",
+        "wind_speed_factor": 0.85,
+        "wind_dir_shift": 15.0,
+        "peak_concentration": 0.588,
+        "mean_concentration": 0.463
+      },
+      {
+        "member_id": "member_2",
+        "name": "Nominal GFS Forecast / Baseline Emissions",
+        "wind_speed_factor": 1.0,
+        "wind_dir_shift": 0.0,
+        "peak_concentration": 0.735,
+        "mean_concentration": 0.579
+      },
+      {
+        "member_id": "member_3",
+        "name": "Higher Wind / West Drift / Elevated Emissions",
+        "wind_speed_factor": 1.2,
+        "wind_dir_shift": -15.0,
+        "peak_concentration": 0.919,
+        "mean_concentration": 0.724
+      }
+    ],
+    "affected_area_union_geojson": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            76.1088,
+            29.4049
+          ],
+          [
+            77.4346,
+            29.4049
+          ],
+          [
+            77.4346,
+            30.0489
+          ],
+          [
+            76.1088,
+            30.0489
+          ],
+          [
+            76.1088,
+            29.4049
+          ]
+        ]
+      ]
+    },
+    "affected_area_intersection_geojson": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            76.1088,
+            29.4049
+          ],
+          [
+            77.4346,
+            29.4049
+          ],
+          [
+            77.4346,
+            30.0489
+          ],
+          [
+            76.1088,
+            30.0489
+          ],
+          [
+            76.1088,
+            29.4049
+          ]
+        ]
+      ]
+    }
+  },
+  "schools": [
+    {
+      "school_id": "sch_dl_narela_001",
+      "name": "Govt Boys Senior Secondary School Narela",
+      "district": "North West Delhi",
+      "distance_to_fire_km": 196.72,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    },
+    {
+      "school_id": "sch_dl_bawana_002",
+      "name": "Sarvodaya Kanya Vidyalaya Bawana",
+      "district": "North West Delhi",
+      "distance_to_fire_km": 197.72,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    },
+    {
+      "school_id": "sch_dl_rohini_003",
+      "name": "Delhi Public School Rohini Sector 24",
+      "district": "North West Delhi",
+      "distance_to_fire_km": 208.86,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    },
+    {
+      "school_id": "sch_dl_pitampura_004",
+      "name": "Bal Bharati Public School Pitampura",
+      "district": "North West Delhi",
+      "distance_to_fire_km": 212.29,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    },
+    {
+      "school_id": "sch_hr_gurugram_005",
+      "name": "The Heritage School Gurugram Sector 62",
+      "district": "Gurugram",
+      "distance_to_fire_km": 236.23,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    },
+    {
+      "school_id": "sch_up_noida_006",
+      "name": "Amity International School Sector 44 Noida",
+      "district": "Gautam Buddh Nagar",
+      "distance_to_fire_km": 237.27,
+      "predicted_arrival_time": null,
+      "peak_concentration": 0.0,
+      "exposure_duration_minutes": 0,
+      "ensemble_members_affected": 0,
+      "impact_probability": 0.0,
+      "uncertainty": 0.0,
+      "risk_score": 0.1,
+      "risk_band": "LOW"
+    }
+  ],
+  "timeline": [
+    {
+      "horizon_offset_hours": 0,
+      "timestamp": "2026-10-08T22:00:00Z",
+      "plume_center_lat": 30.2338,
+      "plume_center_lon": 75.827,
+      "plume_area_sq_km": 150.0,
+      "affected_schools_count": 0,
+      "max_intensity": 1.0,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.627,
+              30.0338
+            ],
+            [
+              76.027,
+              30.0338
+            ],
+            [
+              76.027,
+              30.433799999999998
+            ],
+            [
+              75.627,
+              30.433799999999998
+            ],
+            [
+              75.627,
+              30.0338
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 1,
+      "timestamp": "2026-10-08T23:00:00Z",
+      "plume_center_lat": 30.134,
+      "plume_center_lon": 75.9646,
+      "plume_area_sq_km": 570.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.94,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.7646,
+              29.934
+            ],
+            [
+              76.16460000000001,
+              29.934
+            ],
+            [
+              76.16460000000001,
+              30.334
+            ],
+            [
+              75.7646,
+              30.334
+            ],
+            [
+              75.7646,
+              29.934
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 2,
+      "timestamp": "2026-10-09T00:00:00Z",
+      "plume_center_lat": 30.0343,
+      "plume_center_lon": 76.1022,
+      "plume_area_sq_km": 990.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.88,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              75.9022,
+              29.834300000000002
+            ],
+            [
+              76.3022,
+              29.834300000000002
+            ],
+            [
+              76.3022,
+              30.2343
+            ],
+            [
+              75.9022,
+              30.2343
+            ],
+            [
+              75.9022,
+              29.834300000000002
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 3,
+      "timestamp": "2026-10-09T01:00:00Z",
+      "plume_center_lat": 29.9345,
+      "plume_center_lon": 76.2399,
+      "plume_area_sq_km": 1410.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.82,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.0399,
+              29.7345
+            ],
+            [
+              76.43990000000001,
+              29.7345
+            ],
+            [
+              76.43990000000001,
+              30.1345
+            ],
+            [
+              76.0399,
+              30.1345
+            ],
+            [
+              76.0399,
+              29.7345
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 4,
+      "timestamp": "2026-10-09T02:00:00Z",
+      "plume_center_lat": 29.8347,
+      "plume_center_lon": 76.3775,
+      "plume_area_sq_km": 1830.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.76,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.1775,
+              29.634700000000002
+            ],
+            [
+              76.5775,
+              29.634700000000002
+            ],
+            [
+              76.5775,
+              30.0347
+            ],
+            [
+              76.1775,
+              30.0347
+            ],
+            [
+              76.1775,
+              29.634700000000002
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 5,
+      "timestamp": "2026-10-09T03:00:00Z",
+      "plume_center_lat": 29.735,
+      "plume_center_lon": 76.5151,
+      "plume_area_sq_km": 2250.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.7,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.3151,
+              29.535
+            ],
+            [
+              76.7151,
+              29.535
+            ],
+            [
+              76.7151,
+              29.935
+            ],
+            [
+              76.3151,
+              29.935
+            ],
+            [
+              76.3151,
+              29.535
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "horizon_offset_hours": 6,
+      "timestamp": "2026-10-09T04:00:00Z",
+      "plume_center_lat": 29.6352,
+      "plume_center_lon": 76.6527,
+      "plume_area_sq_km": 2670.0,
+      "affected_schools_count": 0,
+      "max_intensity": 0.64,
+      "contour_geojson": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.4527,
+              29.435200000000002
+            ],
+            [
+              76.8527,
+              29.435200000000002
+            ],
+            [
+              76.8527,
+              29.8352
+            ],
+            [
+              76.4527,
+              29.8352
+            ],
+            [
+              76.4527,
+              29.435200000000002
+            ]
+          ]
+        ]
+      }
+    }
+  ],
+  "map_geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "id": "fire_cluster_001",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            75.827,
+            30.2338
+          ]
+        },
+        "properties": {
+          "layer_type": "fire_source",
+          "hotspot_count": 4,
+          "total_frp_mw": 1023.1,
+          "source_strength": 0.524
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "uncertainty_envelope",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                76.1088,
+                29.4049
+              ],
+              [
+                77.4346,
+                29.4049
+              ],
+              [
+                77.4346,
+                30.0489
+              ],
+              [
+                76.1088,
+                30.0489
+              ],
+              [
+                76.1088,
+                29.4049
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "layer_type": "uncertainty_envelope",
+          "member_count": 3,
+          "stroke_style": "dashed"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_dl_narela_001",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "Govt Boys Senior Secondary School Narela",
+          "district": "North West Delhi",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_dl_bawana_002",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "Sarvodaya Kanya Vidyalaya Bawana",
+          "district": "North West Delhi",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_dl_rohini_003",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "Delhi Public School Rohini Sector 24",
+          "district": "North West Delhi",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_dl_pitampura_004",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "Bal Bharati Public School Pitampura",
+          "district": "North West Delhi",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_hr_gurugram_005",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "The Heritage School Gurugram Sector 62",
+          "district": "Gurugram",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "sch_up_noida_006",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.8
+          ]
+        },
+        "properties": {
+          "layer_type": "school_pin",
+          "name": "Amity International School Sector 44 Noida",
+          "district": "Gautam Buddh Nagar",
+          "risk_band": "LOW",
+          "risk_score": 0.1,
+          "impact_probability": 0.0
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "fire_source": "NASA_FIRMS_VIIRS_NRT",
+    "weather_source": "Open-Meteo_GFS",
+    "school_dataset": "OSM_NCR_Schools",
+    "policy_source": "CAQM_GRAP_Schedule_2025_11_21"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "dhuanalert-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js REST API for the DhuanAlert forecasting pipeline",
+  "scripts": {
+    "start": "node api/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
