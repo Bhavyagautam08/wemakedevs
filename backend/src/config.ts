@@ -1,10 +1,9 @@
 import path from "node:path";
 import dotenv from "dotenv";
 
-dotenv.config();
-
 export const BACKEND_ROOT = path.resolve(__dirname, "..");
 export const PROJECT_ROOT = path.resolve(BACKEND_ROOT, "..");
+dotenv.config({ path: path.resolve(PROJECT_ROOT, ".env") });
 export const ML_MODEL_DIR = path.resolve(PROJECT_ROOT, "ml-model");
 export const DATA_DIR = path.resolve(ML_MODEL_DIR, "src", "data");
 export const OUTPUT_DIR = path.resolve(PROJECT_ROOT, "output", "api-runs");

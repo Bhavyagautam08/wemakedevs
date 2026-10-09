@@ -4,8 +4,29 @@ Contains all physical constants, spatial grid settings, ensemble scenario defini
 and configurable risk scoring weights.
 """
 
+import os
 from typing import Dict, Any
 from pydantic import BaseModel, Field
+
+
+def _load_root_env():
+    """Loads key-value pairs from centralised root .env into os.environ."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_env_path = os.path.abspath(os.path.join(current_dir, "..", "..", ".env"))
+    if os.path.exists(root_env_path):
+        with open(root_env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k = k.strip()
+                v = v.strip().strip("'\"")
+                if k and k not in os.environ:
+                    os.environ[k] = v
+
+
+_load_root_env()
 
 
 class ProjectionConfig(BaseModel):

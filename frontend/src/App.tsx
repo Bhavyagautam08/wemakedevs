@@ -11,7 +11,10 @@ import { SchoolRiskTable } from "./components/SchoolRiskTable";
 import { EvaluationReportCard } from "./components/EvaluationReportCard";
 
 export function App() {
-  const client = useMemo(() => new DhuanAlertClient("http://127.0.0.1:3000"), []);
+  const client = useMemo(
+    () => new DhuanAlertClient(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:3000"),
+    [],
+  );
   const { data, setData, currentRunId, loading, error, refreshForecast } = useForecast(client);
 
   const {
