@@ -1,43 +1,58 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { DhuanAlertClient } from "./api/client";
 import { useForecast } from "./hooks/useForecast";
 import { useTimelineSlider } from "./hooks/useTimelineSlider";
-import { useSchoolRiskFilter } from "./hooks/useSchoolRiskFilter";
-import { Header } from "./components/Header";
-import { AdvisoryBanner } from "./components/AdvisoryBanner";
+import { TopNavbar } from "./components/TopNavbar";
+import { SidebarControls } from "./components/SidebarControls";
 import { PlumeMap } from "./components/PlumeMap";
-import { TimelineSliderControl } from "./components/TimelineSliderControl";
+import { AdvisoryPanel } from "./components/AdvisoryPanel";
 import { SchoolRiskTable } from "./components/SchoolRiskTable";
-import { EvaluationReportCard } from "./components/EvaluationReportCard";
+import { LocationForecastChart } from "./components/LocationForecastChart";
+import { ModelEvaluationChart } from "./components/ModelEvaluationChart";
+import { BottomTelemetryBar } from "./components/BottomTelemetryBar";
 
 export function App() {
   const client = useMemo(
     () => new DhuanAlertClient(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:3000"),
     [],
   );
-  const { data, setData, currentRunId, loading, error, refreshForecast } = useForecast(client);
+  const { data, setData, loading, error, refreshForecast } = useForecast(client);
 
+  // Navigation & Location state
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+
+  // Forecast configuration state
+  const [forecastDate, setForecastDate] = useState("2026-10-09");
+  const [forecastTime, setForecastTime] = useState("14:00");
+  const [horizonHours, setHorizonHours] = useState(6);
+  const [activeMode, setActiveMode] = useState<"live" | "replay">("live");
+
+  // Layer toggles
+  const [showFires, setShowFires] = useState(true);
+  const [showPlume, setShowPlume] = useState(true);
+  const [showWind, setShowWind] = useState(true);
+  const [showSchools, setShowSchools] = useState(true);
+  const [showOpenAq, setShowOpenAq] = useState(true);
+  const [showBoundaries, setShowBoundaries] = useState(true);
+
+  // Overlay option
+  const [overlayOption, setOverlayOption] = useState("pm25");
+
+  // School table filters
+  const [schoolSearch, setSchoolSearch] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("ALL");
+
+  // Time Slider Hook
   const {
     currentStep,
     setCurrentStep,
     currentSlice,
     isPlaying,
     togglePlay,
-    nextStep,
-    prevStep,
   } = useTimelineSlider(data?.prediction.timeline || [], 1400);
 
-  const {
-    search,
-    setSearch,
-    selectedRiskBand,
-    setSelectedRiskBand,
-    sortBy,
-    setSortBy,
-    filteredSchools,
-    totalCount,
-  } = useSchoolRiskFilter(data?.prediction.schools || []);
-
+  // Handle Officer Review
   const handleReview = async (action: "APPROVE" | "REJECT", notes: string) => {
     if (!data?.advisory) return;
     const res = await client.reviewAdvisory(data.advisory.advisory_id, action, "District_Education_Officer", notes);
@@ -47,89 +62,133 @@ export function App() {
     });
   };
 
-  const handleSelectHorizon = (hours: number) => {
-    if (!data?.prediction.timeline) return;
-    const idx = data.prediction.timeline.findIndex((s) => s.horizon_offset_hours === hours);
-    if (idx !== -1) {
-      setCurrentStep(idx);
-    }
+  // Run New Forecast Trigger
+  const handleRunForecast = async (mode: "live" | "replay") => {
+    setActiveMode(mode);
+    await refreshForecast(3);
   };
 
   return (
-    <div className="app-layout">
-      <Header
-        predictionId={currentRunId}
-        generatedAt={data?.prediction.generated_at}
-        onRunReplay={(stage) => refreshForecast(stage)}
-        isLoading={loading}
+    <div className="dhuanalert-app-root">
+      {/* 1. Top Navbar Header */}
+      <TopNavbar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        selectedLocation={selectedLocation}
+        onLocationChange={setSelectedLocation}
+        isLive={activeMode === "live"}
       />
 
-      <main className="main-content">
+      {/* 2. Main Dashboard View */}
+      <main className="dashboard-main-area">
         {loading && (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Running 2D Lagrangian particle transport & Bedrock advisory engine...</p>
+          <div className="fullscreen-loading-overlay">
+            <div className="loading-spinner"></div>
+            <p>Ingesting real-time NASA FIRMS active fires & Open-Meteo GFS wind fields...</p>
           </div>
         )}
 
         {error && (
-          <div className="error-banner">
-            <h3>Forecast Connection Error</h3>
-            <p>{error}</p>
-            <button className="btn btn-primary" onClick={() => refreshForecast()}>
-              Retry Connection
+          <div className="dashboard-error-banner">
+            <span className="error-icon">⚠️</span>
+            <div>
+              <h4>Forecast Pipeline Connection Error</h4>
+              <p>{error}</p>
+            </div>
+            <button className="btn-retry-conn" onClick={() => handleRunForecast("live")}>
+              Retry Live Ingestion
             </button>
           </div>
         )}
 
-        {!loading && data && (
-          <>
-            {/* Top Advisory Banner */}
-            <AdvisoryBanner
-              advisory={data.advisory}
-              onReview={handleReview}
-            />
+        {data && (
+          <div className="dashboard-layout-container">
+            {/* Top 3-Column Section: Sidebar | Center Map | Right Advisory */}
+            <div className="primary-dashboard-row">
+              {/* Left Column: Sidebar Controls */}
+              <div className="col-sidebar">
+                <SidebarControls
+                  date={forecastDate}
+                  onDateChange={setForecastDate}
+                  time={forecastTime}
+                  onTimeChange={setForecastTime}
+                  horizonHours={horizonHours}
+                  onHorizonChange={setHorizonHours}
+                  onRunForecast={handleRunForecast}
+                  isLoading={loading}
+                  activeMode={activeMode}
+                  showFires={showFires}
+                  onToggleFires={setShowFires}
+                  showPlume={showPlume}
+                  onTogglePlume={setShowPlume}
+                  showWind={showWind}
+                  onToggleWind={setShowWind}
+                  showSchools={showSchools}
+                  onToggleSchools={setShowSchools}
+                  showOpenAq={showOpenAq}
+                  onToggleOpenAq={setShowOpenAq}
+                  showBoundaries={showBoundaries}
+                  onToggleBoundaries={setShowBoundaries}
+                  overlayOption={overlayOption}
+                  onOverlayOptionChange={setOverlayOption}
+                />
+              </div>
 
-            {/* Interactive Leaflet Plume Heatmap & Corridor Map */}
-            <PlumeMap
-              prediction={data.prediction}
-              currentSlice={currentSlice}
-              schools={data.prediction.schools}
-              currentStep={currentStep}
-              onSelectHorizon={handleSelectHorizon}
-            />
-
-            {/* Middle Section: Timeline Animation + School Risk Table */}
-            <div className="dashboard-grid">
-              <div className="left-column">
-                <TimelineSliderControl
+              {/* Center Column: Interactive Plume & Wind Vector Map */}
+              <div className="col-center-map">
+                <PlumeMap
+                  prediction={data.prediction}
                   timeline={data.prediction.timeline}
                   currentStep={currentStep}
                   currentSlice={currentSlice}
                   isPlaying={isPlaying}
                   onTogglePlay={togglePlay}
                   onStepChange={setCurrentStep}
-                  onNext={nextStep}
-                  onPrev={prevStep}
+                  schools={data.prediction.schools}
+                  showFires={showFires}
+                  showPlume={showPlume}
+                  showWind={showWind}
+                  showSchools={showSchools}
+                  showOpenAq={showOpenAq}
                 />
-
-                <EvaluationReportCard client={client} />
               </div>
 
-              <div className="right-column">
-                <SchoolRiskTable
-                  schools={filteredSchools}
-                  search={search}
-                  onSearchChange={setSearch}
-                  selectedRiskBand={selectedRiskBand}
-                  onRiskBandChange={setSelectedRiskBand}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  totalCount={totalCount}
+              {/* Right Column: Advisory & Action Summary */}
+              <div className="col-advisory">
+                <AdvisoryPanel
+                  advisory={data.advisory}
+                  prediction={data.prediction}
+                  onReview={handleReview}
                 />
               </div>
             </div>
-          </>
+
+            {/* Middle Section: Top 10 Schools Risk Table | PM2.5 Forecast Chart | Model Evaluation */}
+            <div className="secondary-dashboard-row">
+              <div className="col-schools-table">
+                <SchoolRiskTable
+                  schools={data.prediction.schools}
+                  search={schoolSearch}
+                  onSearchChange={setSchoolSearch}
+                  selectedDistrict={selectedDistrict}
+                  onDistrictChange={setSelectedDistrict}
+                />
+              </div>
+
+              <div className="col-forecast-curve">
+                <LocationForecastChart />
+              </div>
+
+              <div className="col-eval-curve">
+                <ModelEvaluationChart />
+              </div>
+            </div>
+
+            {/* Bottom Section: 4 Status Telemetry Tiles */}
+            <div className="telemetry-bar-row">
+              <BottomTelemetryBar />
+            </div>
+          </div>
         )}
       </main>
     </div>

@@ -24,6 +24,56 @@ export class DataController {
 
   public static async getWeather(req: Request, res: Response, next: NextFunction) {
     try {
+      const latitude = req.query.latitude ? parseFloat(req.query.latitude as string) : 28.6139;
+      const longitude = req.query.longitude ? parseFloat(req.query.longitude as string) : 77.2090;
+      const hourly = (req.query.hourly as string) || "wind_speed_10m,wind_direction_10m,temperature_2m,relative_humidity_2m";
+      const forecastDays = req.query.forecast_days ? parseInt(req.query.forecast_days as string, 10) : 2;
+
+      const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=${hourly}&forecast_days=${forecastDays}`;
+
+      try {
+        const response = await fetch(openMeteoUrl, {
+          headers: { "User-Agent": "DhuanAlert-EarlyWarning/1.0" },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (response.ok) {
+          const liveData: any = await response.json();
+          if (req.query.raw === "true") {
+            return res.status(200).json({ source: "Open-Meteo_GFS_Live", ...liveData });
+          }
+          const times: string[] = liveData.hourly?.time || [];
+          const speeds: number[] = liveData.hourly?.wind_speed_10m || [];
+          const dirs: number[] = liveData.hourly?.wind_direction_10m || [];
+          const temps: number[] = liveData.hourly?.temperature_2m || [];
+          const rhs: number[] = liveData.hourly?.relative_humidity_2m || [];
+
+          const parsed = times.map((t: string, i: number) => {
+            const ws_kmh = speeds[i] ?? 16.0;
+            const ws_mps = Math.round((ws_kmh / 3.6) * 100) / 100;
+            const wdir_deg = dirs[i] ?? 315.0;
+            const rad = (wdir_deg * Math.PI) / 180;
+            const u = Math.round(-ws_mps * Math.sin(rad) * 100) / 100;
+            const v = Math.round(-ws_mps * Math.cos(rad) * 100) / 100;
+            return {
+              forecast_timestamp: `${t}:00Z`,
+              wind_speed_mps: ws_mps,
+              wind_direction_deg: wdir_deg,
+              u_mps: u,
+              v_mps: v,
+              boundary_layer_height_m: 780.0,
+              temperature_c: temps[i] ?? 23.5,
+              relative_humidity_pct: rhs[i] ?? 55.0,
+            };
+          });
+
+          if (parsed.length > 0) {
+            return res.status(200).json(parsed);
+          }
+        }
+      } catch {
+        // Network timeout or error - continue to fallback
+      }
+
       const data = JSON.parse(await fs.readFile(path.join(CONFIG.dataDir, "sample_weather.json"), "utf8"));
       return res.status(200).json(data);
     } catch (err) {

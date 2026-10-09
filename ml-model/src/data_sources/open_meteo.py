@@ -37,13 +37,13 @@ class OpenMeteoClient:
         forecast_days: int = 2,
     ) -> List[WeatherObservation]:
         """
-        Fetches hourly GFS meteorological vectors.
-        Falls back to local sample dataset if network or service is unreachable.
+        Fetches hourly meteorological vectors from Open-Meteo API.
+        Falls back to local sample dataset if network is unreachable.
         """
         params = (
             f"?latitude={latitude}&longitude={longitude}"
-            "&hourly=wind_speed_10m,wind_direction_10m,boundary_layer_height,temperature_2m,relative_humidity_2m"
-            f"&forecast_days={forecast_days}&models=gfs_seamless"
+            "&hourly=wind_speed_10m,wind_direction_10m,temperature_2m,relative_humidity_2m"
+            f"&forecast_days={forecast_days}"
         )
         url = f"{self.base_url}{params}"
         logger.info(f"Fetching live Open-Meteo weather from: {url}")
@@ -92,7 +92,7 @@ class OpenMeteoClient:
 
                 observations.append(
                     WeatherObservation(
-                        timestamp=dt,
+                        forecast_timestamp=dt,
                         wind_speed_mps=ws_mps,
                         wind_direction_deg=wdir_deg,
                         u_mps=u,

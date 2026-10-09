@@ -73,4 +73,15 @@ export class DhuanAlertClient {
   async getEvaluation(): Promise<EvaluationReport> {
     return this.request("/v1/evaluation");
   }
+
+  async getWeather(params: { latitude?: number; longitude?: number; hourly?: string; forecast_days?: number } = {}): Promise<any> {
+    const search = new URLSearchParams();
+    if (params.latitude !== undefined) search.set("latitude", params.latitude.toString());
+    if (params.longitude !== undefined) search.set("longitude", params.longitude.toString());
+    if (params.hourly) search.set("hourly", params.hourly);
+    if (params.forecast_days !== undefined) search.set("forecast_days", params.forecast_days.toString());
+    const qs = search.toString();
+    return this.request(`/v1/data/weather${qs ? `?${qs}` : ""}`);
+  }
 }
+
