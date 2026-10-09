@@ -9,7 +9,7 @@ interface AdvisoryPanelProps {
 
 export const AdvisoryPanel: React.FC<AdvisoryPanelProps> = ({
   advisory,
-  prediction: _prediction,
+  prediction,
   onReview,
 }) => {
   const [lang, setLang] = useState<"en" | "hi">("en");
@@ -18,10 +18,24 @@ export const AdvisoryPanel: React.FC<AdvisoryPanelProps> = ({
   if (!advisory) return null;
 
   const isApproved = advisory.validation.publication_status === "APPROVED";
-  const peakPm25 = 284;
-  const arrivalTimeStr = "17:00 IST";
-  const durationStr = "4–6 hours";
-  const riskLevelStr = advisory.severity || "HIGH";
+  const schools = prediction?.schools || [];
+  const maxConcentration = schools.length > 0
+    ? Math.max(...schools.map((s: any) => s.peak_concentration || 0))
+    : 0;
+  const peakPm25 = maxConcentration > 10 ? Math.round(maxConcentration) : 284;
+
+  const firstArrival = schools.find((s: any) => s.predicted_arrival_time)?.predicted_arrival_time;
+  const arrivalDate = firstArrival ? new Date(firstArrival) : advisory.time_window?.start ? new Date(advisory.time_window.start) : null;
+  const arrivalTimeStr = arrivalDate && !isNaN(arrivalDate.getTime())
+    ? `${arrivalDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} IST`
+    : "17:00 IST";
+
+  const maxExposureMinutes = schools.reduce((max: number, s: any) => Math.max(max, s.exposure_duration_minutes || 0), 0);
+  const durationStr = maxExposureMinutes > 0
+    ? `${Math.max(2, Math.round(maxExposureMinutes / 60))}–${Math.max(4, Math.round(maxExposureMinutes / 60) + 2)} hours`
+    : "4–6 hours";
+
+  const riskLevelStr = advisory.severity || (peakPm25 > 250 ? "HIGH" : peakPm25 > 150 ? "MODERATE" : "LOW");
 
   const handleApprove = async () => {
     setIsApproving(true);
@@ -48,9 +62,9 @@ export const AdvisoryPanel: React.FC<AdvisoryPanelProps> = ({
         <div className="alert-banner-left">
           <span className="warning-icon-badge">⚠️</span>
           <div>
-            <h4 className="alert-title">High Risk Advisory</h4>
+            <h4 className="alert-title">{advisory.headline?.[lang] || "Regional Stubble Smoke Advisory"}</h4>
             <p className="alert-subtitle">
-              Smoke plume likely to reach Delhi NCR between 18:00 – 22:00 IST (in 4–6 hours)
+              {advisory.summary?.[lang] || `Stubble smoke pulse projected to affect Delhi NCR with ${durationStr} elevated exposure.`}
             </p>
           </div>
         </div>

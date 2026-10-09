@@ -65,7 +65,7 @@ export function App() {
   // Run New Forecast Trigger
   const handleRunForecast = async (mode: "live" | "replay") => {
     setActiveMode(mode);
-    await refreshForecast(3);
+    await refreshForecast(3, mode);
   };
 
   return (
@@ -176,7 +176,10 @@ export function App() {
               </div>
 
               <div className="col-forecast-curve">
-                <LocationForecastChart />
+                <LocationForecastChart
+                  timeline={data.prediction.timeline}
+                  schools={data.prediction.schools}
+                />
               </div>
 
               <div className="col-eval-curve">
@@ -186,7 +189,10 @@ export function App() {
 
             {/* Bottom Section: 4 Status Telemetry Tiles */}
             <div className="telemetry-bar-row">
-              <BottomTelemetryBar />
+              <BottomTelemetryBar
+                prediction={data.prediction}
+                grapStage={3}
+              />
             </div>
           </div>
         )}

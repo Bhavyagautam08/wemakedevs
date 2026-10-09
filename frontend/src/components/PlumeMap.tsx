@@ -78,12 +78,14 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
       maxZoom: 16,
     });
 
-    // Dark Satellite base layer
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-      subdomains: "abcd",
-      maxZoom: 19,
-    }).addTo(map);
+    // Free Esri Dark Gray Base map (No API key required, zero watermarks)
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
+        maxZoom: 16,
+      }
+    ).addTo(map);
 
     const layerGroup = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
@@ -120,8 +122,12 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
       layerGroup.addLayer(L.marker([c.lat, c.lon], { icon: cityIcon, interactive: false }));
     });
 
-    // 2. Render Wind Streamlines / Vector Arrows
+    // 2. Render Wind Streamlines / Vector Arrows with real Open-Meteo vectors
     if (showWind) {
+      const windDir = prediction?.weather?.wind_direction_deg ?? 315;
+      const windSpeed = prediction?.weather?.wind_speed_mps ? Math.round(prediction.weather.wind_speed_mps * 3.6) : 16;
+      const arrowRotation = (windDir + 180) % 360;
+
       const windGrid = [
         [31.2, 75.0], [31.0, 75.8], [30.6, 76.5], [30.8, 77.2],
         [30.2, 75.2], [30.0, 76.0], [29.8, 76.8], [29.9, 77.5],
@@ -132,7 +138,14 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
       windGrid.forEach(([lat, lon], idx) => {
         const arrowIcon = L.divIcon({
           className: "custom-wind-arrow",
-          html: `<div class="wind-arrow-glyph" style="animation-delay: ${idx * 0.15}s">↗</div>`,
+          html: `
+            <div class="wind-arrow-glyph" style="transform: rotate(${arrowRotation}deg); animation-delay: ${idx * 0.15}s" title="${windSpeed} km/h (${windDir}°)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </div>
+          `,
           iconSize: [20, 20],
           iconAnchor: [10, 10],
         });
@@ -140,20 +153,30 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
       });
     }
 
-    const fireLat = prediction?.fire.latitude || 30.2338;
-    const fireLon = prediction?.fire.longitude || 75.8270;
+    const fireLat = prediction?.fire?.latitude || 30.2338;
+    const fireLon = prediction?.fire?.longitude || 75.8270;
+    const totalFires = (prediction?.fire as any)?.hotspot_count || 247;
+    const totalFrp = prediction?.fire?.total_frp_mw || 1023;
 
-    // 3. Render NASA FIRMS Active Fire Cluster Markers
+    // 3. Render NASA FIRMS Active Fire Cluster Markers dynamically
     if (showFires) {
-      const fireClusterPoints = [
-        [fireLat, fireLon, 247],
-        [fireLat + 0.18, fireLon - 0.22, 112],
-        [fireLat - 0.15, fireLon + 0.19, 88],
-        [30.85, 75.32, 165],
-        [31.12, 74.95, 190],
-      ];
+      const fireFeatures = prediction?.map_geojson?.features?.filter((f: any) => f.properties?.layer_type === "fire_source") || [];
+      const fireClusterPoints: Array<[number, number, number, number]> = fireFeatures.length > 0
+        ? fireFeatures.map((f: any) => [
+            f.geometry.coordinates[1],
+            f.geometry.coordinates[0],
+            f.properties.hotspot_count || Math.round(totalFires / fireFeatures.length),
+            f.properties.total_frp_mw || totalFrp,
+          ])
+        : [
+            [fireLat, fireLon, totalFires, totalFrp],
+            [fireLat + 0.18, fireLon - 0.22, Math.round(totalFires * 0.45), Math.round(totalFrp * 0.4)],
+            [fireLat - 0.15, fireLon + 0.19, Math.round(totalFires * 0.35), Math.round(totalFrp * 0.3)],
+            [30.85, 75.32, Math.round(totalFires * 0.65), Math.round(totalFrp * 0.5)],
+            [31.12, 74.95, Math.round(totalFires * 0.75), Math.round(totalFrp * 0.6)],
+          ];
 
-      fireClusterPoints.forEach(([fLat, fLon, count]) => {
+      fireClusterPoints.forEach(([fLat, fLon, count, frp]) => {
         const fireIcon = L.divIcon({
           className: "custom-fire-marker",
           html: `
@@ -169,7 +192,8 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
         const fireMarker = L.marker([fLat, fLon], { icon: fireIcon }).bindPopup(`
           <div class="map-popup fire-popup">
             <div class="popup-title">🔥 NASA FIRMS Active Stubble Burning</div>
-            <div class="popup-row"><span>Cluster Fires:</span> <b>${count} VIIRS Detections</b></div>
+            <div class="popup-row"><span>Cluster Fires:</span> <b>${count} VIIRS Hotspots</b></div>
+            <div class="popup-row"><span>Radiative Power:</span> <b>${Math.round(frp)} MW</b></div>
             <div class="popup-row"><span>Coordinates:</span> <b>${fLat.toFixed(3)}°N, ${fLon.toFixed(3)}°E</b></div>
             <div class="popup-row"><span>Detection:</span> <b>Live Satellite Overpass</b></div>
           </div>
@@ -223,18 +247,27 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
         });
       }
 
-      // 6. Plume Head Hover Callout Tooltip
+      // 6. Plume Head Dynamic Callout Tooltip
+      const calculatedPm25 = schools.length > 0 && schools[0].peak_concentration > 10
+        ? Math.round(schools[0].peak_concentration * (0.8 + currentSlice.max_intensity * 0.4))
+        : Math.round(currentSlice.max_intensity * 320 + 72);
+
+      const sliceDate = currentSlice.timestamp ? new Date(currentSlice.timestamp) : new Date();
+      const arrivalStr = sliceDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const riskLevel = calculatedPm25 >= 250 ? "High" : calculatedPm25 >= 150 ? "Moderate" : "Low";
+      const riskBadgeClass = riskLevel === "High" ? "badge-high" : riskLevel === "Moderate" ? "badge-moderate" : "badge-low";
+
       const calloutIcon = L.divIcon({
         className: "custom-plume-callout",
         html: `
           <div class="plume-callout-badge">
             <div class="callout-header">Delhi NCR (T+${h}h)</div>
-            <div class="callout-val">Predicted PM2.5: <b>284 µg/m³</b></div>
-            <div class="callout-sub">Arrival: <b>17:00 IST</b> | Risk: <span class="badge-high">High</span></div>
+            <div class="callout-val">Predicted PM2.5: <b>${calculatedPm25} µg/m³</b></div>
+            <div class="callout-sub">Arrival: <b>${arrivalStr} IST</b> | Risk: <span class="${riskBadgeClass}">${riskLevel}</span></div>
           </div>
         `,
-        iconSize: [180, 50],
-        iconAnchor: [90, 55],
+        iconSize: [190, 52],
+        iconAnchor: [95, 55],
       });
       layerGroup.addLayer(L.marker([centerLat, centerLon], { icon: calloutIcon }));
     }
@@ -349,15 +382,27 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
     return points;
   };
 
-  const timeSlots = [
-    { label: "T+0h", time: "14:00", step: 0 },
-    { label: "T+1h", time: "15:00", step: 1 },
-    { label: "T+2h", time: "16:00", step: 2 },
-    { label: "T+3h", time: "17:00", step: 3 },
-    { label: "T+4h", time: "18:00", step: 4 },
-    { label: "T+5h", time: "19:00", step: 5 },
-    { label: "T+6h", time: "20:00", step: 6 },
-  ];
+  const timeSlots = timeline && timeline.length > 0
+    ? timeline.map((sl, idx) => {
+        const d = sl.timestamp ? new Date(sl.timestamp) : new Date();
+        const timeStr = !isNaN(d.getTime())
+          ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : `${14 + sl.horizon_offset_hours}:00`;
+        return {
+          label: `T+${sl.horizon_offset_hours}h`,
+          time: timeStr,
+          step: idx,
+        };
+      })
+    : [
+        { label: "T+0h", time: "14:00", step: 0 },
+        { label: "T+1h", time: "15:00", step: 1 },
+        { label: "T+2h", time: "16:00", step: 2 },
+        { label: "T+3h", time: "17:00", step: 3 },
+        { label: "T+4h", time: "18:00", step: 4 },
+        { label: "T+5h", time: "19:00", step: 5 },
+        { label: "T+6h", time: "20:00", step: 6 },
+      ];
 
   return (
     <div className="plume-map-wrapper">

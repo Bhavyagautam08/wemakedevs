@@ -8,7 +8,7 @@ export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadOrCreateForecast = useCallback(async (runId?: string, stage: number = 3) => {
+  const loadOrCreateForecast = useCallback(async (runId?: string, stage: number = 3, mode: "live" | "replay" = "live") => {
     setLoading(true);
     setError(null);
     try {
@@ -17,7 +17,7 @@ export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
         setData(payload);
         setCurrentRunId(runId);
       } else {
-        const res = await client.createRun({ grap_stage: stage });
+        const res = await client.createRun({ mode, grap_stage: stage });
         setData(res.payload);
         setCurrentRunId(res.run_id);
       }
@@ -29,7 +29,7 @@ export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
   }, [client]);
 
   useEffect(() => {
-    loadOrCreateForecast(initialRunId);
+    loadOrCreateForecast(initialRunId, 3, "live");
   }, [loadOrCreateForecast, initialRunId]);
 
   return {
@@ -38,7 +38,7 @@ export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
     currentRunId,
     loading,
     error,
-    refreshForecast: (stage?: number) => loadOrCreateForecast(undefined, stage),
+    refreshForecast: (stage?: number, mode: "live" | "replay" = "live") => loadOrCreateForecast(undefined, stage, mode),
     loadSpecificRun: (runId: string) => loadOrCreateForecast(runId),
   };
 }

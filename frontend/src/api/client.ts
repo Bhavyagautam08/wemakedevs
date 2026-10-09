@@ -35,7 +35,7 @@ export class DhuanAlertClient {
   async createRun(options: { mode?: string; snapshot_id?: string; grap_stage?: number } = {}): Promise<{ run_id: string; payload: FrontendPayload }> {
     return this.request("/v1/runs", {
       method: "POST",
-      body: JSON.stringify({ mode: "replay", snapshot_id: "sample", grap_stage: 3, ...options }),
+      body: JSON.stringify({ mode: "live", snapshot_id: "sample", grap_stage: 3, ...options }),
     });
   }
 

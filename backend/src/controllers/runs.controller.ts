@@ -8,12 +8,12 @@ export class RunsController {
   public static async createRun(req: Request, res: Response, next: NextFunction) {
     try {
       const body: CreateRunRequest = req.body || {};
-      const mode = body.mode || "replay";
+      const mode = body.mode || "live";
       const snapshotId = body.snapshot_id || "sample";
       const grapStage = body.grap_stage !== undefined ? body.grap_stage : 3;
 
       if (!["replay", "custom", "live"].includes(mode)) {
-        throw new ApiError(422, "UNSUPPORTED_MODE", "Mode must be 'replay' or 'custom'.");
+        throw new ApiError(422, "UNSUPPORTED_MODE", "Mode must be 'live', 'replay', or 'custom'.");
       }
       if (mode === "replay" && snapshotId !== "sample") {
         throw new ApiError(422, "UNKNOWN_SNAPSHOT", "Only snapshot_id 'sample' is available in this repository.");
