@@ -1,4 +1,4 @@
-import { FrontendPayload, EvaluationReport, AdvisoryOutput, TimelineSlice, SchoolRiskAssessment } from "./types";
+import { FrontendPayload, EvaluationReport, AdvisoryOutput, TimelineSlice, SchoolRiskAssessment, LiveDataSnapshot } from "./types";
 
 export class DhuanAlertClient {
   private baseUrl: string;
@@ -30,6 +30,10 @@ export class DhuanAlertClient {
 
   async getHealth(): Promise<{ status: string; service: string }> {
     return this.request("/health");
+  }
+
+  async getLiveData(): Promise<LiveDataSnapshot> {
+    return this.request("/v1/data/live");
   }
 
   async createRun(options: { mode?: string; snapshot_id?: string; grap_stage?: number } = {}): Promise<{ run_id: string; payload: FrontendPayload }> {

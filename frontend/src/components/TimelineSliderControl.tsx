@@ -30,16 +30,17 @@ export const TimelineSliderControl: React.FC<TimelineSliderControlProps> = ({
         <div>
           <h3>Hourly Plume Advection & School Impact</h3>
           <p className="subtext">
-            2D Lagrangian forward advection timeline (6-hour forecast window)
+            Returned forecast slices: T+{timeline[0].horizon_offset_hours}h to T+
+            {timeline[timeline.length - 1].horizon_offset_hours}h
           </p>
         </div>
 
         <div className="slice-info">
           <span className="hour-badge">
-            T+{currentSlice?.horizon_offset_hours || 0} Hours
+            {currentSlice ? `T+${currentSlice.horizon_offset_hours} Hours` : "Forecast unavailable"}
           </span>
           <span className="schools-hit-badge">
-            {currentSlice?.affected_schools_count || 0} Schools Impacted
+            {currentSlice ? `${currentSlice.affected_schools_count} Schools Impacted` : "Impact unavailable"}
           </span>
         </div>
       </div>

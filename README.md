@@ -110,6 +110,8 @@ npm run dev:frontend
 ```
 The React development server starts at `http://127.0.0.1:5173`.
 
+The dashboard displays live NASA FIRMS VIIRS fire detections across India and Open-Meteo forecast data only. Every fire detection is plotted at its reported coordinates; when the live API returns no detections or is unavailable, the map displays no fire markers and reports the source status. The display does not use bundled fire/weather samples, simulated plume shapes, or synthetic evaluation results. The map background uses OpenStreetMap tiles and does not require a CARTO API key. NASA FIRMS requires `NASA_FIRMS_MAP_KEY`; Open-Meteo is a public API.
+
 ---
 
 ## 🧪 Running Automated Tests
@@ -156,9 +158,10 @@ All endpoints are mounted on the Node.js TypeScript server at `http://127.0.0.1:
 | `POST` | `/v1/claims/validate` | Anti-hallucination claim validator |
 | `GET` | `/v1/evaluation` | Latest backtest evaluation report against ground stations |
 | `POST` | `/v1/evaluation/evaluate` | Compute custom evaluation matrix |
-| `GET` | `/v1/data/schools` | OSM Delhi-NCR school coordinates |
+| `GET` | `/v1/data/schools` | Bundled school reference coordinates (not used by the live dashboard) |
 | `GET` | `/v1/data/fires` | NASA FIRMS VIIRS active fire hotspots |
 | `GET` | `/v1/data/weather` | Open-Meteo GFS North-Westerly wind field |
+| `GET` | `/v1/data/live` | Live fire and weather data plus per-source availability |
 
 ---
 

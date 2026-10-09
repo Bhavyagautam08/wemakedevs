@@ -93,12 +93,13 @@ class Layer1PredictivePipeline:
             horizon_hours=self.config.simulation.horizon_hours,
         )
 
-        # 4. Generate Timeline Slices (T+0 to T+6h) for Frontend Time-Slider
+        # 4. Generate timeline slices only within the configured forecast window.
         timeline_slices = self._generate_timeline_slices(
             now=now,
             primary_fire=primary_fire,
             weather_point=weather[0],
             assessed_schools=assessed_schools,
+            horizon_hours=self.config.simulation.horizon_hours,
         )
 
         # 5. Synthesize Map-Ready GeoJSON
@@ -167,8 +168,9 @@ class Layer1PredictivePipeline:
         primary_fire: Optional[Any],
         weather_point: WeatherObservation,
         assessed_schools: List[SchoolRiskAssessment],
+        horizon_hours: int,
     ) -> List[TimelineSlice]:
-        """Builds multi-horizon animation steps for frontend map slider (T+0 to T+24h)."""
+        """Builds hourly animation steps within the forecast horizon."""
         slices = []
         f_lat = primary_fire.centroid_lat if primary_fire else 30.2
         f_lon = primary_fire.centroid_lon if primary_fire else 75.8
@@ -180,8 +182,7 @@ class Layer1PredictivePipeline:
         # Trajectory path coordinates from origin
         corridor_coords = [[f_lon, f_lat]]
 
-        horizons = [0, 1, 2, 3, 4, 5, 6, 12, 24]
-        for h in horizons:
+        for h in range(horizon_hours + 1):
             t_slice = now + timedelta(hours=h)
             center_lat = round(f_lat + (dy_deg_per_hr * h), 4)
             center_lon = round(f_lon + (dx_deg_per_hr * h), 4)

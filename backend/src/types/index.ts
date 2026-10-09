@@ -23,6 +23,23 @@ export interface WeatherObservation {
   forecast_timestamp: string;
 }
 
+export interface LiveSourceStatus {
+  name: string;
+  status: "ok" | "error";
+  count: number;
+  error?: string;
+}
+
+export interface LiveDataSnapshot {
+  fetched_at: string;
+  sources: {
+    fires: LiveSourceStatus;
+    weather: LiveSourceStatus;
+  };
+  fires: Array<Hotspot & { confidence_class?: string | null }>;
+  weather: WeatherObservation[];
+}
+
 export interface School {
   school_id: string;
   name: string;

@@ -1,200 +1,99 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { DhuanAlertClient } from "./api/client";
-import { useForecast } from "./hooks/useForecast";
-import { useTimelineSlider } from "./hooks/useTimelineSlider";
-import { TopNavbar } from "./components/TopNavbar";
-import { SidebarControls } from "./components/SidebarControls";
-import { PlumeMap } from "./components/PlumeMap";
-import { AdvisoryPanel } from "./components/AdvisoryPanel";
-import { SchoolRiskTable } from "./components/SchoolRiskTable";
-import { LocationForecastChart } from "./components/LocationForecastChart";
-import { ModelEvaluationChart } from "./components/ModelEvaluationChart";
-import { BottomTelemetryBar } from "./components/BottomTelemetryBar";
+import { useLiveData } from "./hooks/useLiveData";
+import { Header } from "./components/Header";
+import { LiveMap } from "./components/LiveMap";
+import { LiveDataSnapshot } from "./api/types";
+
+function getCurrentWeather(data: LiveDataSnapshot): LiveDataSnapshot["weather"][number] | null {
+  if (data.weather.length === 0) return null;
+  const now = Date.now();
+  return data.weather.find((item) => new Date(item.forecast_timestamp).getTime() >= now)
+    ?? data.weather[data.weather.length - 1];
+}
 
 export function App() {
   const client = useMemo(
     () => new DhuanAlertClient(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:3000"),
     [],
   );
-  const { data, setData, loading, error, refreshForecast } = useForecast(client);
-
-  // Navigation & Location state
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [selectedLocation, setSelectedLocation] = useState("all");
-
-  // Forecast configuration state
-  const [forecastDate, setForecastDate] = useState("2026-10-09");
-  const [forecastTime, setForecastTime] = useState("14:00");
-  const [horizonHours, setHorizonHours] = useState(6);
-  const [activeMode, setActiveMode] = useState<"live" | "replay">("live");
-
-  // Layer toggles
-  const [showFires, setShowFires] = useState(true);
-  const [showPlume, setShowPlume] = useState(true);
-  const [showWind, setShowWind] = useState(true);
-  const [showSchools, setShowSchools] = useState(true);
-  const [showOpenAq, setShowOpenAq] = useState(true);
-  const [showBoundaries, setShowBoundaries] = useState(true);
-
-  // Overlay option
-  const [overlayOption, setOverlayOption] = useState("pm25");
-
-  // School table filters
-  const [schoolSearch, setSchoolSearch] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("ALL");
-
-  // Time Slider Hook
-  const {
-    currentStep,
-    setCurrentStep,
-    currentSlice,
-    isPlaying,
-    togglePlay,
-  } = useTimelineSlider(data?.prediction.timeline || [], 1400);
-
-  // Handle Officer Review
-  const handleReview = async (action: "APPROVE" | "REJECT", notes: string) => {
-    if (!data?.advisory) return;
-    const res = await client.reviewAdvisory(data.advisory.advisory_id, action, "District_Education_Officer", notes);
-    setData({
-      ...data,
-      advisory: res.advisory,
-    });
-  };
-
-  // Run New Forecast Trigger
-  const handleRunForecast = async (mode: "live" | "replay") => {
-    setActiveMode(mode);
-    await refreshForecast(3, mode);
-  };
+  const { data, loading, error, refresh } = useLiveData(client);
+  const currentWeather = data ? getCurrentWeather(data) : null;
 
   return (
-    <div className="dhuanalert-app-root">
-      {/* 1. Top Navbar Header */}
-      <TopNavbar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        selectedLocation={selectedLocation}
-        onLocationChange={setSelectedLocation}
-        isLive={activeMode === "live"}
-      />
-
-      {/* 2. Main Dashboard View */}
-      <main className="dashboard-main-area">
-        {loading && (
-          <div className="fullscreen-loading-overlay">
-            <div className="loading-spinner"></div>
-            <p>Ingesting real-time NASA FIRMS active fires & Open-Meteo GFS wind fields...</p>
+    <div className="app-layout">
+      <Header fetchedAt={data?.fetched_at} onRefresh={refresh} isLoading={loading} />
+      <main className="main-content live-dashboard">
+        {loading && !data && (
+          <div className="loading-state">
+            <div className="spinner" />
+            <p>Fetching live satellite fire and weather data...</p>
           </div>
         )}
 
         {error && (
-          <div className="dashboard-error-banner">
-            <span className="error-icon">⚠️</span>
-            <div>
-              <h4>Forecast Pipeline Connection Error</h4>
-              <p>{error}</p>
-            </div>
-            <button className="btn-retry-conn" onClick={() => handleRunForecast("live")}>
-              Retry Live Ingestion
+          <div className="error-banner" role="alert">
+            <h3>Live data API unavailable</h3>
+            <p>{error}</p>
+            <button className="btn btn-primary" onClick={refresh} disabled={loading}>
+              Retry live data
             </button>
           </div>
         )}
 
         {data && (
-          <div className="dashboard-layout-container">
-            {/* Top 3-Column Section: Sidebar | Center Map | Right Advisory */}
-            <div className="primary-dashboard-row">
-              {/* Left Column: Sidebar Controls */}
-              <div className="col-sidebar">
-                <SidebarControls
-                  date={forecastDate}
-                  onDateChange={setForecastDate}
-                  time={forecastTime}
-                  onTimeChange={setForecastTime}
-                  horizonHours={horizonHours}
-                  onHorizonChange={setHorizonHours}
-                  onRunForecast={handleRunForecast}
-                  isLoading={loading}
-                  activeMode={activeMode}
-                  showFires={showFires}
-                  onToggleFires={setShowFires}
-                  showPlume={showPlume}
-                  onTogglePlume={setShowPlume}
-                  showWind={showWind}
-                  onToggleWind={setShowWind}
-                  showSchools={showSchools}
-                  onToggleSchools={setShowSchools}
-                  showOpenAq={showOpenAq}
-                  onToggleOpenAq={setShowOpenAq}
-                  showBoundaries={showBoundaries}
-                  onToggleBoundaries={setShowBoundaries}
-                  overlayOption={overlayOption}
-                  onOverlayOptionChange={setOverlayOption}
-                />
-              </div>
+          <>
+            <div className="live-source-grid">
+              <section className="live-source-card">
+                <div className="live-source-heading">
+                  <h2>{data.sources.fires.name}</h2>
+                  <span className={`source-status ${data.sources.fires.status}`}>
+                    {data.sources.fires.status === "ok" ? "Connected" : "Unavailable"}
+                  </span>
+                </div>
+                {data.sources.fires.status === "ok" ? (
+                  <p>
+                    {data.fires.length === 0
+                      ? "No active fire detections returned for this area and time range."
+                      : `${data.fires.length} active detections returned by the live API.`}
+                  </p>
+                ) : (
+                  <p className="source-error">{data.sources.fires.error}</p>
+                )}
+              </section>
 
-              {/* Center Column: Interactive Plume & Wind Vector Map */}
-              <div className="col-center-map">
-                <PlumeMap
-                  prediction={data.prediction}
-                  timeline={data.prediction.timeline}
-                  currentStep={currentStep}
-                  currentSlice={currentSlice}
-                  isPlaying={isPlaying}
-                  onTogglePlay={togglePlay}
-                  onStepChange={setCurrentStep}
-                  schools={data.prediction.schools}
-                  showFires={showFires}
-                  showPlume={showPlume}
-                  showWind={showWind}
-                  showSchools={showSchools}
-                  showOpenAq={showOpenAq}
-                />
-              </div>
-
-              {/* Right Column: Advisory & Action Summary */}
-              <div className="col-advisory">
-                <AdvisoryPanel
-                  advisory={data.advisory}
-                  prediction={data.prediction}
-                  onReview={handleReview}
-                />
-              </div>
+              <section className="live-source-card">
+                <div className="live-source-heading">
+                  <h2>{data.sources.weather.name}</h2>
+                  <span className={`source-status ${data.sources.weather.status}`}>
+                    {data.sources.weather.status === "ok" ? "Connected" : "Unavailable"}
+                  </span>
+                </div>
+                {data.sources.weather.status === "ok" && currentWeather ? (
+                  <>
+                    <p className="weather-values">
+                      Wind {((currentWeather.wind_speed_mps * 3.6)).toFixed(1)} km/h
+                      {" · "}{currentWeather.wind_direction_deg}°
+                      {" · "}{currentWeather.temperature_c}°C
+                    </p>
+                    <p className="weather-timestamp">
+                      Forecast for {new Date(currentWeather.forecast_timestamp).toLocaleString()}
+                    </p>
+                  </>
+                ) : (
+                  <p className="source-error">
+                    {data.sources.weather.error || "No live weather forecast observations returned."}
+                  </p>
+                )}
+              </section>
             </div>
 
-            {/* Middle Section: Top 10 Schools Risk Table | PM2.5 Forecast Chart | Model Evaluation */}
-            <div className="secondary-dashboard-row">
-              <div className="col-schools-table">
-                <SchoolRiskTable
-                  schools={data.prediction.schools}
-                  search={schoolSearch}
-                  onSearchChange={setSchoolSearch}
-                  selectedDistrict={selectedDistrict}
-                  onDistrictChange={setSelectedDistrict}
-                />
-              </div>
-
-              <div className="col-forecast-curve">
-                <LocationForecastChart
-                  timeline={data.prediction.timeline}
-                  schools={data.prediction.schools}
-                />
-              </div>
-
-              <div className="col-eval-curve">
-                <ModelEvaluationChart />
-              </div>
-            </div>
-
-            {/* Bottom Section: 4 Status Telemetry Tiles */}
-            <div className="telemetry-bar-row">
-              <BottomTelemetryBar
-                prediction={data.prediction}
-                grapStage={3}
-              />
-            </div>
-          </div>
+            <LiveMap data={data} />
+            <p className="live-data-note">
+              Fire markers are individual NASA FIRMS detections. The map intentionally shows no fire marker
+              when the live feed contains no detections or is unavailable.
+            </p>
+          </>
         )}
       </main>
     </div>

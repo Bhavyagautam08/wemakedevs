@@ -53,7 +53,11 @@ def main():
 
     # 5. DATA (Reference files)
     p_data = subparsers.add_parser("data", help="Get reference data")
-    p_data.add_argument("--type", choices=["schools", "fires", "weather", "grap", "config"], required=True)
+    p_data.add_argument(
+        "--type",
+        choices=["schools", "fires", "weather", "live", "live-fires", "live-weather", "grap", "config"],
+        required=True,
+    )
 
     args = parser.parse_args()
     service = DhuanAlertService()
@@ -153,6 +157,12 @@ def main():
         elif args.type == "weather":
             weather = service.get_sample_weather()
             print(json.dumps([w.model_dump(mode="json") for w in weather], indent=2))
+        elif args.type == "live":
+            print(json.dumps(service.get_live_data_snapshot(), indent=2))
+        elif args.type == "live-fires":
+            print(json.dumps([fire.model_dump(mode="json") for fire in service.get_live_fires()], indent=2))
+        elif args.type == "live-weather":
+            print(json.dumps([item.model_dump(mode="json") for item in service.get_live_weather()], indent=2))
         elif args.type == "grap":
             print(json.dumps(service.get_grap_catalog(), indent=2))
         elif args.type == "config":

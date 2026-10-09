@@ -81,6 +81,33 @@ class DhuanAlertService:
     def get_live_weather(self) -> List[WeatherObservation]:
         return self.weather_client.fetch_forecast()
 
+    def get_live_data_snapshot(self) -> Dict[str, Any]:
+        """Return only records fetched successfully from live data providers."""
+        sources: Dict[str, Dict[str, Any]] = {}
+        records: Dict[str, List[Dict[str, Any]]] = {"fires": [], "weather": []}
+
+        for name, fetch, target in (
+            ("NASA FIRMS", self.get_live_fires, "fires"),
+            ("Open-Meteo", self.get_live_weather, "weather"),
+        ):
+            try:
+                fetched = fetch()
+                records[target] = [item.model_dump(mode="json") for item in fetched]
+                sources[target] = {"name": name, "status": "ok", "count": len(fetched)}
+            except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
+                sources[target] = {
+                    "name": name,
+                    "status": "error",
+                    "count": 0,
+                    "error": str(error),
+                }
+
+        return {
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "sources": sources,
+            **records,
+        }
+
     def get_grap_catalog(self) -> Dict[str, Any]:
         catalog = {}
         for stage_num, defn in GRAP_SCHEDULE.items():

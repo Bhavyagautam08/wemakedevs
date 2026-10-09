@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { PredictiveOutput, TimelineSlice, SchoolRiskAssessment } from "../api/types";
 
-// Leaflet default icon fix
+// Fix standard Leaflet default icon issues in bundled React
 const DefaultIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -15,75 +15,49 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface PlumeMapProps {
   prediction?: PredictiveOutput;
-  timeline: TimelineSlice[];
-  currentStep: number;
   currentSlice: TimelineSlice | null;
-  isPlaying: boolean;
-  onTogglePlay: () => void;
-  onStepChange: (step: number) => void;
   schools: SchoolRiskAssessment[];
-  // Layer visibility toggles from parent
-  showFires?: boolean;
-  showPlume?: boolean;
-  showWind?: boolean;
-  showSchools?: boolean;
-  showOpenAq?: boolean;
+  currentStep: number;
+  onSelectHorizon?: (hours: number) => void;
 }
 
 export const PlumeMap: React.FC<PlumeMapProps> = ({
   prediction,
-  timeline,
-  currentStep,
   currentSlice,
-  isPlaying,
-  onTogglePlay,
-  onStepChange,
   schools,
-  showFires = true,
-  showPlume = true,
-  showWind = true,
-  showSchools = true,
-  showOpenAq = true,
+  currentStep,
+  onSelectHorizon,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
-  const CITIES = [
-    { name: "Amritsar", lat: 31.634, lon: 74.872 },
-    { name: "Jalandhar", lat: 31.326, lon: 75.576 },
-    { name: "Patiala", lat: 30.339, lon: 76.386 },
-    { name: "Sirsa", lat: 29.534, lon: 75.028 },
-    { name: "Hisar", lat: 29.149, lon: 75.721 },
-    { name: "Karnal", lat: 29.685, lon: 76.990 },
-    { name: "Panipat", lat: 29.390, lon: 76.963 },
-    { name: "Rohtak", lat: 28.895, lon: 76.606 },
-    { name: "Meerut", lat: 28.984, lon: 77.706 },
-    { name: "Delhi", lat: 28.613, lon: 77.209, highlight: true },
-    { name: "Gurugram", lat: 28.459, lon: 77.026 },
-    { name: "Faridabad", lat: 28.408, lon: 77.317 },
-    { name: "Ghaziabad", lat: 28.669, lon: 77.453 },
-  ];
+  // Layer visibility toggles
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showScatter, setShowScatter] = useState(true);
+  const [showSchools, setShowSchools] = useState(true);
+  const [showCorridor, setShowCorridor] = useState(true);
+  const [showHotspots, setShowHotspots] = useState(true);
 
   // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const initialCenter: [number, number] = [29.6, 76.4];
+    // Center on Northern India / Delhi-NCR (Punjab to Delhi corridor)
+    const initialCenter: [number, number] = [29.5, 76.5];
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
-      zoom: 7.2,
-      zoomControl: false,
+      zoom: 7.5,
+      zoomControl: true,
       minZoom: 5,
       maxZoom: 16,
     });
 
-    // Free Esri Dark Gray Base map (No API key required, zero watermarks)
     L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
-        attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
-        maxZoom: 16,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
       }
     ).addTo(map);
 
@@ -98,7 +72,7 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
     };
   }, []);
 
-  // Update Layers
+  // Update Layers on Data or Timeline Slice Change
   useEffect(() => {
     const map = mapInstanceRef.current;
     const layerGroup = layerGroupRef.current;
@@ -106,177 +80,130 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
 
     layerGroup.clearLayers();
 
-    // 1. Render Regional City Labels
-    CITIES.forEach((c) => {
-      const cityIcon = L.divIcon({
-        className: "custom-city-label",
+    const fire = prediction?.fire;
+    const hasFireLocation = fire
+      && fire.fire_id !== "none"
+      && fire.status !== "INACTIVE"
+      && Number.isFinite(fire.latitude)
+      && Number.isFinite(fire.longitude);
+
+    // 1. Render the modeled fire origin.
+    if (showHotspots && fire && hasFireLocation) {
+      const fireIcon = L.divIcon({
+        className: "custom-fire-marker",
         html: `
-          <div class="city-pin-node ${c.highlight ? 'delhi-highlight' : ''}">
-            <span class="city-dot"></span>
-            <span class="city-name">${c.name}</span>
+          <div class="fire-pulse-pin">
+            <span class="fire-emoji">🔥</span>
+            <span class="fire-ripple"></span>
           </div>
         `,
-        iconSize: [80, 20],
-        iconAnchor: [6, 6],
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       });
-      layerGroup.addLayer(L.marker([c.lat, c.lon], { icon: cityIcon, interactive: false }));
-    });
 
-    // 2. Render Wind Streamlines / Vector Arrows with real Open-Meteo vectors
-    if (showWind) {
-      const windDir = prediction?.weather?.wind_direction_deg ?? 315;
-      const windSpeed = prediction?.weather?.wind_speed_mps ? Math.round(prediction.weather.wind_speed_mps * 3.6) : 16;
-      const arrowRotation = (windDir + 180) % 360;
-
-      const windGrid = [
-        [31.2, 75.0], [31.0, 75.8], [30.6, 76.5], [30.8, 77.2],
-        [30.2, 75.2], [30.0, 76.0], [29.8, 76.8], [29.9, 77.5],
-        [29.4, 75.5], [29.2, 76.3], [29.0, 77.0], [29.1, 77.8],
-        [28.8, 76.2], [28.6, 76.9], [28.4, 77.4], [28.3, 77.9],
-      ];
-
-      windGrid.forEach(([lat, lon], idx) => {
-        const arrowIcon = L.divIcon({
-          className: "custom-wind-arrow",
-          html: `
-            <div class="wind-arrow-glyph" style="transform: rotate(${arrowRotation}deg); animation-delay: ${idx * 0.15}s" title="${windSpeed} km/h (${windDir}°)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </div>
-          `,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-        });
-        layerGroup.addLayer(L.marker([lat, lon], { icon: arrowIcon, interactive: false }));
-      });
+      const fireMarker = L.marker([fire.latitude, fire.longitude], { icon: fireIcon }).bindPopup(`
+        <div class="map-popup fire-popup">
+          <div class="popup-title">🔥 Fire Cluster in Forecast Input</div>
+          <div class="popup-row"><span>Source Strength:</span> <b>${fire.total_frp_mw.toFixed(0)} MW (FRP)</b></div>
+          <div class="popup-row"><span>Satellite Detections:</span> <b>${fire.hotspot_count} Hotspots (VIIRS)</b></div>
+          <div class="popup-row"><span>Location:</span> <b>${fire.latitude.toFixed(3)}°N, ${fire.longitude.toFixed(3)}°E</b></div>
+          <div class="popup-tag">${fire.status}</div>
+        </div>
+      `);
+      layerGroup.addLayer(fireMarker);
     }
 
-    const fireLat = prediction?.fire?.latitude || 30.2338;
-    const fireLon = prediction?.fire?.longitude || 75.8270;
-    const totalFires = (prediction?.fire as any)?.hotspot_count || 247;
-    const totalFrp = prediction?.fire?.total_frp_mw || 1023;
-
-    // 3. Render NASA FIRMS Active Fire Cluster Markers dynamically
-    if (showFires) {
-      const fireFeatures = prediction?.map_geojson?.features?.filter((f: any) => f.properties?.layer_type === "fire_source") || [];
-      const fireClusterPoints: Array<[number, number, number, number]> = fireFeatures.length > 0
-        ? fireFeatures.map((f: any) => [
-            f.geometry.coordinates[1],
-            f.geometry.coordinates[0],
-            f.properties.hotspot_count || Math.round(totalFires / fireFeatures.length),
-            f.properties.total_frp_mw || totalFrp,
-          ])
-        : [
-            [fireLat, fireLon, totalFires, totalFrp],
-            [fireLat + 0.18, fireLon - 0.22, Math.round(totalFires * 0.45), Math.round(totalFrp * 0.4)],
-            [fireLat - 0.15, fireLon + 0.19, Math.round(totalFires * 0.35), Math.round(totalFrp * 0.3)],
-            [30.85, 75.32, Math.round(totalFires * 0.65), Math.round(totalFrp * 0.5)],
-            [31.12, 74.95, Math.round(totalFires * 0.75), Math.round(totalFrp * 0.6)],
-          ];
-
-      fireClusterPoints.forEach(([fLat, fLon, count, frp]) => {
-        const fireIcon = L.divIcon({
-          className: "custom-fire-marker",
-          html: `
-            <div class="fire-flame-pin">
-              <span class="flame-core">🔥</span>
-              <span class="flame-glow"></span>
-            </div>
-          `,
-          iconSize: [30, 30],
-          iconAnchor: [15, 15],
-        });
-
-        const fireMarker = L.marker([fLat, fLon], { icon: fireIcon }).bindPopup(`
-          <div class="map-popup fire-popup">
-            <div class="popup-title">🔥 NASA FIRMS Active Stubble Burning</div>
-            <div class="popup-row"><span>Cluster Fires:</span> <b>${count} VIIRS Hotspots</b></div>
-            <div class="popup-row"><span>Radiative Power:</span> <b>${Math.round(frp)} MW</b></div>
-            <div class="popup-row"><span>Coordinates:</span> <b>${fLat.toFixed(3)}°N, ${fLon.toFixed(3)}°E</b></div>
-            <div class="popup-row"><span>Detection:</span> <b>Live Satellite Overpass</b></div>
-          </div>
-        `);
-        layerGroup.addLayer(fireMarker);
-      });
+    // 2. Render Trajectory Corridor Track
+    if (showCorridor && currentSlice?.corridor_geojson?.coordinates) {
+      const lineCoords: [number, number][] = currentSlice.corridor_geojson.coordinates.map(
+        (c: number[]) => [c[1], c[0]]
+      );
+      const corridorLine = L.polyline(lineCoords, {
+        color: "#6366f1",
+        weight: 3,
+        dashArray: "6, 8",
+        opacity: 0.85,
+      }).bindTooltip("Estimated 2D Advection Centerline", { sticky: true });
+      layerGroup.addLayer(corridorLine);
     }
 
-    // 4. Render Multi-Level Rainbow Gaussian Dispersion Plume Heatmap
-    if (showPlume && currentSlice) {
-      const centerLat = currentSlice.plume_center_lat || 29.5;
-      const centerLon = currentSlice.plume_center_lon || 76.5;
-      const h = currentSlice.horizon_offset_hours;
-      const spread = maxSpread(h);
+    // 3. Render Multi-Level Plume Heatmap Contours
+    if (showHeatmap && currentSlice) {
+      if (currentSlice.heatmap_levels && currentSlice.heatmap_levels.length > 0) {
+        // Render from outermost fringe to core
+        [...currentSlice.heatmap_levels].reverse().forEach((level) => {
+          const latLngs: [number, number][] = level.coordinates.map((coord: number[]) => [
+            coord[1],
+            coord[0],
+          ]);
 
-      // Rainbow multi-band plume contours (Purple -> Red -> Orange -> Yellow -> Green -> Blue)
-      const plumeBands = [
-        { color: "#3b82f6", opacity: 0.18, scaleX: 1.6, scaleY: 0.95 },  // Light Outer Blue
-        { color: "#10b981", opacity: 0.25, scaleX: 1.35, scaleY: 0.75 }, // Green Dispersion
-        { color: "#eab308", opacity: 0.38, scaleX: 1.1, scaleY: 0.6 },   // Yellow Smoke
-        { color: "#f97316", opacity: 0.52, scaleX: 0.85, scaleY: 0.45 }, // Orange Core
-        { color: "#ef4444", opacity: 0.68, scaleX: 0.55, scaleY: 0.3 },  // Red Dense Center
-        { color: "#a855f7", opacity: 0.80, scaleX: 0.28, scaleY: 0.15 }, // Magenta Hotspot Peak
-      ];
+          const opacity =
+            level.level === "core" ? 0.65 : level.level === "dispersing" ? 0.45 : 0.25;
+          const fillOpacity =
+            level.level === "core" ? 0.45 : level.level === "dispersing" ? 0.28 : 0.15;
 
-      plumeBands.forEach((band) => {
-        const polyCoords = createPlumeOval(fireLat, fireLon, centerLat, centerLon, spread * band.scaleX, spread * band.scaleY);
-        const poly = L.polygon(polyCoords, {
-          color: band.color,
-          weight: 1.5,
-          opacity: band.opacity * 1.2,
-          fillColor: band.color,
-          fillOpacity: band.opacity,
-          smoothFactor: 1.5,
+          const poly = L.polygon(latLngs, {
+            color: level.color,
+            weight: 2,
+            opacity,
+            fillColor: level.color,
+            fillOpacity,
+            smoothFactor: 1.5,
+          }).bindPopup(`
+            <div class="map-popup plume-popup">
+              <div class="popup-title">🌫️ Smoke Plume (${level.level.toUpperCase()})</div>
+              <div class="popup-row"><span>Forecast Horizon:</span> <b>T+${currentSlice.horizon_offset_hours} Hours</b></div>
+              <div class="popup-row"><span>Plume Footprint:</span> <b>${Math.round(currentSlice.plume_area_sq_km)} km²</b></div>
+              <div class="popup-row"><span>Max Intensity:</span> <b>${(currentSlice.max_intensity * 100).toFixed(0)}%</b></div>
+              <div class="popup-tag" style="background: ${level.color}; color: #fff;">${level.intensity.toUpperCase()} DENSITY</div>
+            </div>
+          `);
+          layerGroup.addLayer(poly);
+        });
+      } else if (currentSlice.contour_geojson?.coordinates) {
+        // Fallback polygon
+        const latLngs: [number, number][] = currentSlice.contour_geojson.coordinates[0].map(
+          (c: number[]) => [c[1], c[0]]
+        );
+        const poly = L.polygon(latLngs, {
+          color: "#f97316",
+          weight: 2,
+          fillColor: "#f97316",
+          fillOpacity: 0.35,
         });
         layerGroup.addLayer(poly);
-      });
-
-      // 5. Render Particle Scatter Points
-      if (currentSlice.scatter_points) {
-        currentSlice.scatter_points.forEach(([pLat, pLon, weight]) => {
-          const r = Math.max(3, Math.min(8, weight * 7));
-          const circle = L.circleMarker([pLat, pLon], {
-            radius: r,
-            color: "#fbbf24",
-            fillColor: "#ea580c",
-            fillOpacity: 0.7,
-            weight: 1,
-          });
-          layerGroup.addLayer(circle);
-        });
       }
-
-      // 6. Plume Head Dynamic Callout Tooltip
-      const calculatedPm25 = schools.length > 0 && schools[0].peak_concentration > 10
-        ? Math.round(schools[0].peak_concentration * (0.8 + currentSlice.max_intensity * 0.4))
-        : Math.round(currentSlice.max_intensity * 320 + 72);
-
-      const sliceDate = currentSlice.timestamp ? new Date(currentSlice.timestamp) : new Date();
-      const arrivalStr = sliceDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const riskLevel = calculatedPm25 >= 250 ? "High" : calculatedPm25 >= 150 ? "Moderate" : "Low";
-      const riskBadgeClass = riskLevel === "High" ? "badge-high" : riskLevel === "Moderate" ? "badge-moderate" : "badge-low";
-
-      const calloutIcon = L.divIcon({
-        className: "custom-plume-callout",
-        html: `
-          <div class="plume-callout-badge">
-            <div class="callout-header">Delhi NCR (T+${h}h)</div>
-            <div class="callout-val">Predicted PM2.5: <b>${calculatedPm25} µg/m³</b></div>
-            <div class="callout-sub">Arrival: <b>${arrivalStr} IST</b> | Risk: <span class="${riskBadgeClass}">${riskLevel}</span></div>
-          </div>
-        `,
-        iconSize: [190, 52],
-        iconAnchor: [95, 55],
-      });
-      layerGroup.addLayer(L.marker([centerLat, centerLon], { icon: calloutIcon }));
     }
 
-    // 7. Render School Risk Pins
-    if (showSchools && schools.length > 0) {
+    // 4. Render Particle Scatter Cloud
+    if (showScatter && currentSlice?.scatter_points) {
+      currentSlice.scatter_points.forEach(([lat, lon, weight]) => {
+        const radius = Math.max(3, Math.min(8, weight * 7));
+        const circle = L.circleMarker([lat, lon], {
+          radius,
+          color: "#ea580c",
+          fillColor: "#fbbf24",
+          fillOpacity: 0.65,
+          weight: 1,
+        }).bindTooltip(`Particle Intensity: ${(weight * 100).toFixed(0)}%`, {
+          direction: "top",
+          opacity: 0.85,
+        });
+        layerGroup.addLayer(circle);
+      });
+    }
+
+    // 5. Render School Risk Markers
+    if (showSchools) {
       schools.forEach((s) => {
-        const sLat = s.latitude || 28.6139;
-        const sLon = s.longitude || 77.2090;
+        if (
+          typeof s.latitude !== "number"
+          || typeof s.longitude !== "number"
+          || !Number.isFinite(s.latitude)
+          || !Number.isFinite(s.longitude)
+        ) return;
+        const lat = s.latitude;
+        const lon = s.longitude;
 
         const colorMap: Record<string, string> = {
           VERY_HIGH: "#ef4444",
@@ -287,177 +214,161 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
         const color = colorMap[s.risk_band] || "#3b82f6";
 
         const schoolIcon = L.divIcon({
-          className: "custom-school-pin",
+          className: "custom-school-marker",
           html: `
-            <div class="school-marker-dot" style="background: ${color}; box-shadow: 0 0 8px ${color}">
-              <span>🏫</span>
+            <div class="school-pin-badge" style="background-color: ${color};">
+              <span class="school-emoji">🏫</span>
             </div>
           `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
 
-        const marker = L.marker([sLat, sLon], { icon: schoolIcon }).bindPopup(`
+        const arrivalText = s.predicted_arrival_time
+          ? new Date(s.predicted_arrival_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : "No Direct Pulse";
+
+        const schoolMarker = L.marker([lat, lon], { icon: schoolIcon }).bindPopup(`
           <div class="map-popup school-popup">
             <div class="popup-title">🏫 ${s.name}</div>
             <div class="popup-row"><span>District:</span> <b>${s.district}</b></div>
-            <div class="popup-row"><span>Predicted PM2.5:</span> <b>${(s.peak_concentration || 284).toFixed(0)} µg/m³</b></div>
-            <div class="popup-row"><span>Arrival Time:</span> <b>${s.predicted_arrival_time ? new Date(s.predicted_arrival_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "17:00 IST"}</b></div>
             <div class="popup-row"><span>Risk Score:</span> <b>${(s.risk_score * 100).toFixed(1)} / 100</b></div>
+            <div class="popup-row"><span>Impact Probability:</span> <b>${(s.impact_probability * 100).toFixed(0)}%</b></div>
+            <div class="popup-row"><span>Predicted Arrival:</span> <b>${arrivalText}</b></div>
             <div class="popup-tag" style="background: ${color}; color: #fff;">${s.risk_band} RISK</div>
           </div>
         `);
-        layerGroup.addLayer(marker);
-      });
-    }
-
-    // 8. Render OpenAQ Ground Stations
-    if (showOpenAq) {
-      const openAqStations = [
-        { name: "Anand Vihar CAAQMS", lat: 28.647, lon: 77.315, aqi: 448 },
-        { name: "Narela CAAQMS", lat: 28.852, lon: 77.098, aqi: 385 },
-        { name: "Bawana CAAQMS", lat: 28.776, lon: 77.051, aqi: 412 },
-        { name: "Rohini Sec 16", lat: 28.732, lon: 77.119, aqi: 360 },
-        { name: "IGI Airport T3", lat: 28.556, lon: 77.099, aqi: 182 },
-      ];
-
-      openAqStations.forEach((st) => {
-        const aqIcon = L.divIcon({
-          className: "custom-openaq-pin",
-          html: `<div class="openaq-ring-pin"><span class="aq-inner-dot"></span></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-        });
-
-        const m = L.marker([st.lat, st.lon], { icon: aqIcon }).bindPopup(`
-          <div class="map-popup aq-popup">
-            <div class="popup-title">🟢 OpenAQ Station: ${st.name}</div>
-            <div class="popup-row"><span>Live AQI:</span> <b>${st.aqi} (Severe)</b></div>
-            <div class="popup-row"><span>Status:</span> <b>Active Ground Sensor</b></div>
-          </div>
-        `);
-        layerGroup.addLayer(m);
+        layerGroup.addLayer(schoolMarker);
       });
     }
   }, [
     prediction,
-    timeline,
-    currentStep,
     currentSlice,
     schools,
-    showFires,
-    showPlume,
-    showWind,
+    currentStep,
+    showHeatmap,
+    showScatter,
     showSchools,
-    showOpenAq,
+    showCorridor,
+    showHotspots,
   ]);
 
-  const maxSpread = (h: number) => Math.max(0.2, 0.15 + h * 0.05);
-
-  const createPlumeOval = (
-    fLat: number,
-    fLon: number,
-    cLat: number,
-    cLon: number,
-    radiusX: number,
-    radiusY: number
-  ): [number, number][] => {
-    const points: [number, number][] = [];
-    const steps = 32;
-    const midLat = (fLat + cLat) / 2;
-    const midLon = (fLon + cLon) / 2;
-    const angle = Math.atan2(cLat - fLat, cLon - fLon);
-
-    for (let i = 0; i <= steps; i++) {
-      const theta = (i / steps) * 2 * Math.PI;
-      const x = (radiusX * 1.6) * Math.cos(theta);
-      const y = (radiusY * 0.9) * Math.sin(theta);
-
-      // Rotate along wind corridor
-      const rotX = x * Math.cos(angle) - y * Math.sin(angle);
-      const rotY = x * Math.sin(angle) + y * Math.cos(angle);
-
-      points.push([midLat + rotY, midLon + rotX]);
-    }
-    return points;
-  };
-
-  const timeSlots = timeline && timeline.length > 0
-    ? timeline.map((sl, idx) => {
-        const d = sl.timestamp ? new Date(sl.timestamp) : new Date();
-        const timeStr = !isNaN(d.getTime())
-          ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-          : `${14 + sl.horizon_offset_hours}:00`;
-        return {
-          label: `T+${sl.horizon_offset_hours}h`,
-          time: timeStr,
-          step: idx,
-        };
-      })
-    : [
-        { label: "T+0h", time: "14:00", step: 0 },
-        { label: "T+1h", time: "15:00", step: 1 },
-        { label: "T+2h", time: "16:00", step: 2 },
-        { label: "T+3h", time: "17:00", step: 3 },
-        { label: "T+4h", time: "18:00", step: 4 },
-        { label: "T+5h", time: "19:00", step: 5 },
-        { label: "T+6h", time: "20:00", step: 6 },
-      ];
+  const windSpeedKmh = prediction?.weather
+    ? Math.round(prediction.weather.wind_speed_mps * 3.6)
+    : null;
+  const windDirDeg = prediction?.weather
+    ? Math.round(prediction.weather.wind_direction_deg)
+    : null;
+  const horizons = prediction?.timeline.map((slice) => slice.horizon_offset_hours) ?? [];
 
   return (
     <div className="plume-map-wrapper">
-      {/* 1. Map Top Timeline Animation Controller */}
-      <div className="map-top-time-bar">
-        <button className="btn-time-play" onClick={onTogglePlay}>
-          {isPlaying ? "⏸" : "▶"}
-        </button>
+      {/* Map Header Controls */}
+      <div className="map-toolbar">
+        <div className="toolbar-left">
+          <div className="map-badge">
+            <span className="live-pulse"></span>
+            <b>Interactive Lagrangian Smoke Corridor Map</b>
+          </div>
+          <small className="map-data-disclosure">
+            Sample plume outlines and particle scatter are illustrative model visualizations.
+          </small>
 
-        <div className="time-slots-container">
-          {timeSlots.map((slot) => {
-            const isActive = currentStep === slot.step;
-            return (
-              <button
-                key={slot.label}
-                className={`time-slot-btn ${isActive ? "active" : ""}`}
-                onClick={() => onStepChange(slot.step)}
-              >
-                <span className="slot-title">{slot.label}</span>
-                <span className="slot-time">{slot.time}</span>
-              </button>
-            );
-          })}
+          {/* Quick Horizon Buttons */}
+          <div className="horizon-pills">
+            {horizons.map((h) => {
+              const isActive = currentSlice?.horizon_offset_hours === h;
+              return (
+                <button
+                  key={h}
+                  className={`horizon-btn ${isActive ? "active" : ""}`}
+                  onClick={() => onSelectHorizon && onSelectHorizon(h)}
+                >
+                  {h === 0 ? "Current (T+0)" : `+${h}h`}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="map-zoom-tools">
-          <button
-            className="tool-btn"
-            onClick={() => mapInstanceRef.current?.zoomIn()}
-          >
-            +
-          </button>
-          <button
-            className="tool-btn"
-            onClick={() => mapInstanceRef.current?.zoomOut()}
-          >
-            −
-          </button>
-          <button
-            className="tool-btn"
-            onClick={() => mapInstanceRef.current?.setView([29.6, 76.4], 7.2)}
-          >
-            🎯
-          </button>
+        {/* Layer Visibility Toggles */}
+        <div className="layer-toggles">
+          <label className="toggle-chip">
+            <input
+              type="checkbox"
+              checked={showHotspots}
+              onChange={(e) => setShowHotspots(e.target.checked)}
+            />
+            🔥 Fires
+          </label>
+          <label className="toggle-chip">
+            <input
+              type="checkbox"
+              checked={showHeatmap}
+              onChange={(e) => setShowHeatmap(e.target.checked)}
+            />
+            🌫️ Plume Heatmap
+          </label>
+          <label className="toggle-chip">
+            <input
+              type="checkbox"
+              checked={showScatter}
+              onChange={(e) => setShowScatter(e.target.checked)}
+            />
+            ✨ Particle Scatter
+          </label>
+          <label className="toggle-chip">
+            <input
+              type="checkbox"
+              checked={showCorridor}
+              onChange={(e) => setShowCorridor(e.target.checked)}
+            />
+            🛤️ Corridor Track
+          </label>
+          <label className="toggle-chip">
+            <input
+              type="checkbox"
+              checked={showSchools}
+              onChange={(e) => setShowSchools(e.target.checked)}
+            />
+            🏫 School Pins
+          </label>
         </div>
       </div>
 
-      {/* 2. Map Leaflet Canvas */}
+      {/* Map Leaflet Container */}
       <div className="map-canvas-container" ref={mapContainerRef} style={{ height: "460px", width: "100%" }}></div>
 
-      {/* 3. Scale Legend Overlay */}
-      <div className="map-scale-overlay">
-        <span>0</span>
-        <span className="scale-bar"></span>
-        <span>100 km</span>
+      {/* Floating Map Legend & Atmospheric Telemetry */}
+      <div className="map-telemetry-overlay">
+        <div className="telemetry-card">
+          <div className="telemetry-item">
+            <span className="label">Forecast Horizon:</span>
+            <span className="value highlight">
+              {currentSlice ? `T+${currentSlice.horizon_offset_hours}h` : "Unavailable"}
+            </span>
+          </div>
+          <div className="telemetry-item">
+            <span className="label">Plume Footprint:</span>
+            <span className="value">
+              {currentSlice ? `${Math.round(currentSlice.plume_area_sq_km)} km²` : "Unavailable"}
+            </span>
+          </div>
+          <div className="telemetry-item">
+            <span className="label">Wind Vector:</span>
+            <span className="value">
+              {windSpeedKmh !== null && windDirDeg !== null
+                ? `${windSpeedKmh} km/h @ ${windDirDeg}°`
+                : "Unavailable"}
+            </span>
+          </div>
+          <div className="telemetry-item">
+            <span className="label">Impacted Schools:</span>
+            <span className="value text-warning">
+              {currentSlice ? `${currentSlice.affected_schools_count} / ${schools.length}` : "Unavailable"}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

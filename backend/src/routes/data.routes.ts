@@ -7,3 +7,4 @@ dataRouter.get("/config", DataController.getConfig);
 dataRouter.get("/data/schools", DataController.getSchools);
 dataRouter.get("/data/fires", DataController.getFires);
 dataRouter.get("/data/weather", DataController.getWeather);
+dataRouter.get("/data/live", DataController.getLiveData);

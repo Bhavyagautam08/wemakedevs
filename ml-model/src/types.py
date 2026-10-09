@@ -20,6 +20,7 @@ class Hotspot(BaseModel):
     longitude: float
     acq_timestamp: datetime
     confidence: float = Field(..., ge=0.0, le=100.0)
+    confidence_class: Optional[str] = None
     frp: float = Field(..., ge=0.0, description="Fire Radiative Power in MW")
     satellite: str = "VIIRS_NRT"
 

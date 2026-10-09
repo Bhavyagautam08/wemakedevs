@@ -28,6 +28,8 @@ def test_layer1_simulation(service):
     pred: PredictiveOutput = service.simulate_layer1()
     assert pred.prediction_id.startswith("pred_")
     assert len(pred.timeline) >= 7
+    assert pred.timeline[-1].horizon_offset_hours == pred.simulation["horizon_hours"]
+    assert all(slice_.horizon_offset_hours <= pred.simulation["horizon_hours"] for slice_ in pred.timeline)
     assert len(pred.timeline[0].scatter_points) > 0
     assert len(pred.schools) > 0
     assert pred.ensemble.member_count == 3

@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { CONFIG, PROJECT_ROOT } from "../config";
-import { CreateRunRequest, FrontendPayload, EvaluationReport, PredictiveOutput, AdvisoryOutput } from "../types";
+import { CreateRunRequest, FrontendPayload, EvaluationReport, PredictiveOutput, AdvisoryOutput, LiveDataSnapshot } from "../types";
 
 export interface ModelPipelineResult {
   payload: FrontendPayload;
@@ -107,6 +107,21 @@ export class ModelService {
     } finally {
       await fs.rm(workingOutputDir, { recursive: true, force: true });
     }
+  }
+
+  public static async getLiveDataSnapshot(): Promise<LiveDataSnapshot> {
+    const output = await this.executeRunner(["data", "--type", "live"]);
+    return JSON.parse(output) as LiveDataSnapshot;
+  }
+
+  public static async getLiveFires(): Promise<LiveDataSnapshot["fires"]> {
+    const output = await this.executeRunner(["data", "--type", "live-fires"]);
+    return JSON.parse(output) as LiveDataSnapshot["fires"];
+  }
+
+  public static async getLiveWeather(): Promise<LiveDataSnapshot["weather"]> {
+    const output = await this.executeRunner(["data", "--type", "live-weather"]);
+    return JSON.parse(output) as LiveDataSnapshot["weather"];
   }
 
   public static async simulateLayer1(data: { hotspots?: any[]; weather?: any[]; schools?: any[] } = {}): Promise<PredictiveOutput> {

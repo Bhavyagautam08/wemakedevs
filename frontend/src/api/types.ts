@@ -34,6 +34,36 @@ export interface SchoolRiskAssessment {
   risk_band: RiskBand;
 }
 
+export interface LiveWeatherObservation {
+  forecast_timestamp: string;
+  wind_speed_mps: number;
+  wind_direction_deg: number;
+  u_mps: number;
+  v_mps: number;
+  boundary_layer_height_m: number;
+  temperature_c: number;
+  relative_humidity_pct?: number | null;
+}
+
+export interface LiveDataSnapshot {
+  fetched_at: string;
+  sources: {
+    fires: { name: string; status: "ok" | "error"; count: number; error?: string };
+    weather: { name: string; status: "ok" | "error"; count: number; error?: string };
+  };
+  fires: Array<{
+    detection_id: string;
+    latitude: number;
+    longitude: number;
+    acq_timestamp: string;
+    confidence: number;
+    confidence_class?: string | null;
+    frp: number;
+    satellite: string;
+  }>;
+  weather: LiveWeatherObservation[];
+}
+
 export interface TimelineSlice {
   horizon_offset_hours: number;
   timestamp: string;

@@ -37,29 +37,30 @@ class OpenMeteoClient:
         forecast_days: int = 2,
     ) -> List[WeatherObservation]:
         """
-        Fetches hourly meteorological vectors from Open-Meteo API.
-        Falls back to local sample dataset if network is unreachable.
+        Fetches hourly GFS meteorological vectors.
+        Live requests never fall back to a bundled snapshot.
         """
         params = (
             f"?latitude={latitude}&longitude={longitude}"
-            "&hourly=wind_speed_10m,wind_direction_10m,temperature_2m,relative_humidity_2m"
-            f"&forecast_days={forecast_days}"
+            "&hourly=wind_speed_10m,wind_direction_10m,boundary_layer_height,temperature_2m,relative_humidity_2m"
+            f"&forecast_days={forecast_days}&models=gfs_seamless&timezone=UTC"
         )
         url = f"{self.base_url}{params}"
         logger.info(f"Fetching live Open-Meteo weather from: {url}")
 
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "DhuanAlert-EarlyWarning/1.0"},
+        )
         try:
-            req = urllib.request.Request(
-                url,
-                headers={"User-Agent": "DhuanAlert-EarlyWarning/1.0"},
-            )
-            with urllib.request.urlopen(req, timeout=10) as response:
+            with urllib.request.urlopen(req, timeout=15) as response:
                 data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            raise RuntimeError(f"Open-Meteo request failed with HTTP {error.code}.") from None
+        except (urllib.error.URLError, TimeoutError) as error:
+            raise RuntimeError("Open-Meteo request failed due to a network error or timeout.") from None
 
-            return self._parse_response(data)
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, Exception) as e:
-            logger.warning(f"Failed to fetch live Open-Meteo weather ({e}). Falling back to cached snapshot.")
-            return self.load_fallback_weather()
+        return self._parse_response(data)
 
     def _parse_response(self, data: dict) -> List[WeatherObservation]:
         """Parses Open-Meteo JSON into WeatherObservation vector objects."""
@@ -76,13 +77,15 @@ class OpenMeteoClient:
         for i in range(len(times)):
             try:
                 t_str = times[i]
-                dt = datetime.fromisoformat(t_str).replace(tzinfo=timezone.utc)
-                ws_kmh = float(speeds[i]) if i < len(speeds) and speeds[i] is not None else 16.0
+                dt = datetime.fromisoformat(t_str)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                ws_kmh = float(speeds[i])
                 ws_mps = round(ws_kmh / 3.6, 2)
-                wdir_deg = float(dirs[i]) if i < len(dirs) and dirs[i] is not None else 315.0
-                blh = float(blhs[i]) if i < len(blhs) and blhs[i] is not None else 780.0
-                temp = float(temps[i]) if i < len(temps) and temps[i] is not None else 23.5
-                rh = float(rhs[i]) if i < len(rhs) and rhs[i] is not None else 55.0
+                wdir_deg = float(dirs[i])
+                blh = float(blhs[i])
+                temp = float(temps[i])
+                rh = float(rhs[i])
 
                 # Compute meteorological u (eastward) and v (northward) vector components
                 # Wind direction is where wind blows FROM.
@@ -102,13 +105,12 @@ class OpenMeteoClient:
                         relative_humidity_pct=rh,
                     )
                 )
-            except Exception as e:
+            except (IndexError, TypeError, ValueError) as e:
                 logger.debug(f"Skipping malformed weather index {i}: {e}")
                 continue
 
         if not observations:
-            logger.warning("Empty weather observation list from Open-Meteo. Falling back to cached snapshot.")
-            return self.load_fallback_weather()
+            raise ValueError("Open-Meteo returned no valid hourly weather observations.")
 
         logger.info(f"Successfully ingested {len(observations)} hourly weather forecast vectors from Open-Meteo.")
         return observations
