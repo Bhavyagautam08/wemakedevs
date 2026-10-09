@@ -1,9 +1,9 @@
 {
   "prediction": {
-    "prediction_id": "pred_20261008_2200_delhincr",
-    "generated_at": "2026-10-08T22:00:00Z",
-    "valid_from": "2026-10-08T22:00:00Z",
-    "valid_until": "2026-10-09T04:00:00Z",
+    "prediction_id": "pred_20261009_144451314708_delhincr",
+    "generated_at": "2026-10-09T14:44:51.314708Z",
+    "valid_from": "2026-10-09T14:44:51.314708Z",
+    "valid_until": "2026-10-09T20:44:51.314708Z",
     "model": {
       "type": "lagrangian_smoke_transport_2d",
       "version": "1.0.0",
@@ -15,9 +15,9 @@
       "longitude": 75.827,
       "hotspot_count": 4,
       "total_frp_mw": 1023.1,
-      "source_strength": 0.524,
-      "source_freshness_hours": 1.25,
-      "status": "ACTIVE"
+      "source_strength": 0.098,
+      "source_freshness_hours": 18.0,
+      "status": "AGED"
     },
     "weather": {
       "wind_speed_mps": 4.8,
@@ -30,7 +30,7 @@
     "simulation": {
       "timestep_seconds": 900,
       "horizon_hours": 6,
-      "particle_count": 611,
+      "particle_count": 444,
       "diffusion_kx": 250.0,
       "diffusion_ky": 250.0,
       "decay_rate": 0.000032
@@ -43,24 +43,24 @@
           "name": "Lower Wind / East Drift / Reduced Emissions",
           "wind_speed_factor": 0.85,
           "wind_dir_shift": 15.0,
-          "peak_concentration": 0.588,
-          "mean_concentration": 0.463
+          "peak_concentration": 0.172,
+          "mean_concentration": 0.134
         },
         {
           "member_id": "member_2",
           "name": "Nominal GFS Forecast / Baseline Emissions",
           "wind_speed_factor": 1.0,
           "wind_dir_shift": 0.0,
-          "peak_concentration": 0.735,
-          "mean_concentration": 0.579
+          "peak_concentration": 0.214,
+          "mean_concentration": 0.167
         },
         {
           "member_id": "member_3",
           "name": "Higher Wind / West Drift / Elevated Emissions",
           "wind_speed_factor": 1.2,
           "wind_dir_shift": -15.0,
-          "peak_concentration": 0.919,
-          "mean_concentration": 0.724
+          "peak_concentration": 0.268,
+          "mean_concentration": 0.209
         }
       ],
       "affected_area_union_geojson": {
@@ -68,24 +68,24 @@
         "coordinates": [
           [
             [
-              76.1088,
-              29.4049
+              76.1658,
+              29.3838
             ],
             [
-              77.4346,
-              29.4049
+              77.4806,
+              29.3838
             ],
             [
-              77.4346,
-              30.0489
+              77.4806,
+              30.0108
             ],
             [
-              76.1088,
-              30.0489
+              76.1658,
+              30.0108
             ],
             [
-              76.1088,
-              29.4049
+              76.1658,
+              29.3838
             ]
           ]
         ]
@@ -95,24 +95,24 @@
         "coordinates": [
           [
             [
-              76.1088,
-              29.4049
+              76.1658,
+              29.3838
             ],
             [
-              77.4346,
-              29.4049
+              77.4806,
+              29.3838
             ],
             [
-              77.4346,
-              30.0489
+              77.4806,
+              30.0108
             ],
             [
-              76.1088,
-              30.0489
+              76.1658,
+              30.0108
             ],
             [
-              76.1088,
-              29.4049
+              76.1658,
+              29.3838
             ]
           ]
         ]
@@ -207,7 +207,7 @@
     "timeline": [
       {
         "horizon_offset_hours": 0,
-        "timestamp": "2026-10-08T22:00:00Z",
+        "timestamp": "2026-10-09T14:44:51.314708Z",
         "plume_center_lat": 30.2338,
         "plume_center_lon": 75.827,
         "plume_area_sq_km": 150.0,
@@ -243,7 +243,7 @@
       },
       {
         "horizon_offset_hours": 1,
-        "timestamp": "2026-10-08T23:00:00Z",
+        "timestamp": "2026-10-09T15:44:51.314708Z",
         "plume_center_lat": 30.134,
         "plume_center_lon": 75.9646,
         "plume_area_sq_km": 570.0,
@@ -279,7 +279,7 @@
       },
       {
         "horizon_offset_hours": 2,
-        "timestamp": "2026-10-09T00:00:00Z",
+        "timestamp": "2026-10-09T16:44:51.314708Z",
         "plume_center_lat": 30.0343,
         "plume_center_lon": 76.1022,
         "plume_area_sq_km": 990.0,
@@ -315,7 +315,7 @@
       },
       {
         "horizon_offset_hours": 3,
-        "timestamp": "2026-10-09T01:00:00Z",
+        "timestamp": "2026-10-09T17:44:51.314708Z",
         "plume_center_lat": 29.9345,
         "plume_center_lon": 76.2399,
         "plume_area_sq_km": 1410.0,
@@ -351,7 +351,7 @@
       },
       {
         "horizon_offset_hours": 4,
-        "timestamp": "2026-10-09T02:00:00Z",
+        "timestamp": "2026-10-09T18:44:51.314708Z",
         "plume_center_lat": 29.8347,
         "plume_center_lon": 76.3775,
         "plume_area_sq_km": 1830.0,
@@ -387,7 +387,7 @@
       },
       {
         "horizon_offset_hours": 5,
-        "timestamp": "2026-10-09T03:00:00Z",
+        "timestamp": "2026-10-09T19:44:51.314708Z",
         "plume_center_lat": 29.735,
         "plume_center_lon": 76.5151,
         "plume_area_sq_km": 2250.0,
@@ -423,7 +423,7 @@
       },
       {
         "horizon_offset_hours": 6,
-        "timestamp": "2026-10-09T04:00:00Z",
+        "timestamp": "2026-10-09T20:44:51.314708Z",
         "plume_center_lat": 29.6352,
         "plume_center_lon": 76.6527,
         "plume_area_sq_km": 2670.0,
@@ -475,7 +475,7 @@
             "layer_type": "fire_source",
             "hotspot_count": 4,
             "total_frp_mw": 1023.1,
-            "source_strength": 0.524
+            "source_strength": 0.098
           }
         },
         {
@@ -486,24 +486,24 @@
             "coordinates": [
               [
                 [
-                  76.1088,
-                  29.4049
+                  76.1658,
+                  29.3838
                 ],
                 [
-                  77.4346,
-                  29.4049
+                  77.4806,
+                  29.3838
                 ],
                 [
-                  77.4346,
-                  30.0489
+                  77.4806,
+                  30.0108
                 ],
                 [
-                  76.1088,
-                  30.0489
+                  76.1658,
+                  30.0108
                 ],
                 [
-                  76.1088,
-                  29.4049
+                  76.1658,
+                  29.3838
                 ]
               ]
             ]
@@ -638,7 +638,7 @@
     }
   },
   "advisory": {
-    "advisory_id": "adv_20261009_pred_20261008_2200_delhincr",
+    "advisory_id": "adv_20261009_pred_20261009_144451314708_delhincr",
     "severity": "MODERATE",
     "headline": {
       "en": "Smoke Corridor Precautionary Advisory: North West Delhi",
@@ -653,8 +653,8 @@
       "school_count": 0
     },
     "time_window": {
-      "start": "2026-10-08T22:00:00Z",
-      "end": "2026-10-09T04:00:00Z"
+      "start": "2026-10-09T14:44:51.314708Z",
+      "end": "2026-10-09T20:44:51.314708Z"
     },
     "recommended_actions": [],
     "risk": {
@@ -663,7 +663,7 @@
     },
     "evidence": [
       {
-        "source_id": "pred_20261008_2200_delhincr",
+        "source_id": "pred_20261009_144451314708_delhincr",
         "type": "model_prediction"
       },
       {
@@ -678,7 +678,7 @@
       "rejection_reason": "Proposed actions exceeded current GRAP statutory authorization."
     },
     "model_metadata": {
-      "prediction_id": "pred_20261008_2200_delhincr",
+      "prediction_id": "pred_20261009_144451314708_delhincr",
       "model_version": "1.0.0",
       "cedar_policy_version": "2025_11_21",
       "bedrock_model": "amazon.nova-micro-v1:0"

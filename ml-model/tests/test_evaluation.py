@@ -69,9 +69,23 @@ def run_evaluation_demo():
     return report
 
 
+def test_evaluation_metrics():
+    """Pytest test asserting evaluation matrix results meet benchmark thresholds."""
+    report = run_evaluation_demo()
+    assert report.station_count == 4
+    assert report.spearman_rho >= 0.40
+    assert report.median_arrival_lag_hours <= 2.5
+    assert report.contingency.probability_of_detection >= 0.75
+    assert report.contingency.false_alarm_ratio <= 0.30
+    assert report.contingency.critical_success_index >= 0.50
+    assert report.envelope_capture_rate >= 0.80
+    assert "VALIDATED" in report.operational_verdict
+
+
 if __name__ == "__main__":
     report = run_evaluation_demo()
     print("=" * 60)
     print("DHUANALERT REAL-WORLD EVALUATION REPORT")
     print("=" * 60)
     print(report.model_dump_json(indent=2))
+

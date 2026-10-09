@@ -6,7 +6,12 @@ and exports ready-to-use JSON files for the Backend and Frontend teams.
 
 import json
 import os
+import sys
 from datetime import datetime, timezone
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from src.types import Hotspot, WeatherObservation, School
 from src.pipeline import DhuanAlertPipeline
 from src.model.evaluation import evaluate_model_against_ground_truth

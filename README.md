@@ -1,4 +1,4 @@
-# 🌫️ DhuanAlert — AI Architecture & Core Engine
+# 🌫️ DhuanAlert — Monorepo Architecture
 ### Hybrid Smoke Early-Warning, School Cluster Risk Scorer & Policy-Constrained Advisory Platform
 **Built for WeMakeDevs Environmental Hacks (Bharat Builds Tour, Air Track)**
 
@@ -15,114 +15,150 @@ During North India's stubble burning season (Oct–Nov), school closures are typ
 
 ---
 
-## 🏗️ Repository Architecture
+## 🏗️ Modular Project Architecture
+
+The repository is organized into three clean, decoupled layers:
 
 ```
-dhuanalert/
-├── demo.py                          # Executable end-to-end runner (exports JSONs)
-├── requirements.txt                 # Core dependencies (numpy, pydantic, boto3)
-├── src/
-│   ├── config.py                    # Physical parameters, grid, and scoring weights
-│   ├── types.py                     # Standardized Pydantic schemas (Prediction & Advisory)
-│   ├── pipeline.py                  # Master pipeline combining Layer 1 + Layer 2
-│   ├── layer1_predictive/           # LAYER 1: PREDICTIVE / PHYSICS ENGINE
-│   │   ├── coordinates.py           # Metric local projection (meters) <-> WGS84
-│   │   ├── fire_source.py           # VIIRS clustering & source_strength estimation
-│   │   ├── weather_field.py         # 2D wind field u(x,y,t), v(x,y,t) + BLH mixing
-│   │   ├── lagrangian_engine.py     # 2D stochastic particle advection & mass decay
-│   │   ├── diffusion_field.py       # 2D Gaussian diffusion C(x,y,t) & sigma spread
-│   │   ├── ensemble.py              # 3-member physical scenarios & impact probability
-│   │   ├── school_scorer.py         # School spatial intersection & risk scoring
-│   │   └── pipeline.py              # Layer 1 Runner: generates Prediction + GeoJSON
-│   ├── layer2_generative/           # LAYER 2: GENERATIVE AI & POLICY ENGINE
-│   │   ├── grap_policy.py           # Statutory CAQM GRAP definitions (Stages I–IV)
-│   │   ├── cedar_guardrail.py       # Deterministic AWS Cedar policy evaluation gate
-│   │   ├── claim_validator.py       # Fact/claim classification & zero-hallucination guard
-│   │   ├── bedrock_agent.py         # Amazon Bedrock bilingual agent (with offline mock)
-│   │   └── pipeline.py              # Layer 2 Runner: Intent -> Policy -> Claims -> Publish
-│   ├── model/
-│   │   └── evaluation.py            # Real-world evaluation matrix (POD, FAR, CSI, lag, rho)
-│   └── data/
-│       ├── sample_fires.json        # VIIRS active-fire detections in Punjab
-│       ├── sample_weather.json      # Open-Meteo GFS North-Westerly wind field
-│       └── ncr_schools.json         # Sample OSM schools across Delhi-NCR
-├── tests/
-│   └── test_evaluation.py           # Evaluation matrix verification test
-└── output/                          # Generated JSON payloads for Backend/Frontend
+wemakedevs/
+├── backend/                         # Node.js + Express + TypeScript API (MERN backend)
+│   ├── package.json                 # Backend dependencies (express, cors, dotenv, tsx, typescript)
+│   ├── tsconfig.json                # TypeScript compiler configuration
+│   ├── src/
+│   │   ├── server.ts                # Server entrypoint (listening on http://127.0.0.1:3000)
+│   │   ├── app.ts                   # Express app factory (CORS, body-parser, routes, error handling)
+│   │   ├── config.ts                # Environment and path configurations
+│   │   ├── types/index.ts           # Shared TypeScript domain contracts
+│   │   ├── middleware/              # Error handler and request middlewares
+│   │   ├── services/
+│   │   │   ├── model.service.ts     # Subprocess bridge invoking the Python ML model
+│   │   │   ├── policy.service.ts    # CAQM GRAP schedule & AWS Cedar policy authorizer
+│   │   │   ├── claims.service.ts    # Anti-hallucination claim validator
+│   │   │   ├── evaluation.service.ts# Ground-truth evaluation matrix computation
+│   │   │   └── storage.service.ts   # Stored run persistence in output/api-runs/
+│   │   ├── controllers/             # Express controllers (runs, advisories, policy, evaluation, data)
+│   │   └── routes/                  # Express REST routes mounted on /v1 and /health
+│   └── tests/
+│       └── server.test.ts           # Automated backend test suite (tsx --test)
+│
+├── frontend/                        # React + TypeScript + Vite Dashboard (SPA)
+│   ├── package.json                 # Frontend dependencies (react, react-dom, lucide-react, vite)
+│   ├── tsconfig.json                # Frontend TypeScript configuration
+│   ├── vite.config.ts               # Vite bundler & API proxy configuration
+│   ├── index.html                   # HTML entrypoint
+│   └── src/
+│       ├── main.tsx                 # React DOM bootstrap
+│       ├── App.tsx                  # Main dashboard layout
+│       ├── index.css                # Modern dark-mode UI design system
+│       ├── api/
+│       │   ├── types.ts             # Typed API contracts matching backend
+│       │   └── client.ts            # Typed isomorphic API client
+│       ├── hooks/
+│       │   ├── useForecast.ts       # Hook for loading/triggering forecast simulations
+│       │   ├── useTimelineSlider.ts # Hook for time-slider playback (T+0 to T+6h)
+│       │   └── useSchoolRiskFilter.ts# Hook for searching & filtering school risk rankings
+│       └── components/
+│           ├── Header.tsx           # Dashboard top navigation & simulation triggers
+│           ├── AdvisoryBanner.tsx   # Bilingual advisory card & officer review gate
+│           ├── TimelineSliderControl.tsx # Time-slider playback controller
+│           ├── SchoolRiskTable.tsx  # Interactive school cluster risk assessment table
+│           └── EvaluationReportCard.tsx # Ground-truth model verification matrix card
+│
+├── ml-model/                        # Python ML, Physics Simulation & GenAI Engine
+│   ├── requirements.txt             # Python dependencies (numpy, pydantic, boto3, pytest)
+│   ├── run_pipeline.py              # CLI dispatcher bridge for the backend
+│   ├── demo.py                      # Standalone executable runner
+│   ├── conftest.py                  # Pytest configuration
+│   ├── src/
+│   │   ├── config.py                # Physical constants, grid projection, scoring weights
+│   │   ├── types.py                 # Pydantic schema contracts
+│   │   ├── service.py               # Central Python service interface
+│   │   ├── pipeline.py              # Master orchestration pipeline
+│   │   ├── layer1_predictive/       # Lagrangian 2D dispersion, wind vectors, school scoring
+│   │   ├── layer2_generative/       # Amazon Bedrock bilingual agent, AWS Cedar gate, claims
+│   │   ├── model/evaluation.py      # Ground-truth evaluation matrix against ground stations
+│   │   └── data/                    # Sample active fires, GFS wind, and OSM school coordinates
+│   └── tests/
+│       ├── test_service.py          # Unit tests for simulation and advisory generation
+│       └── test_evaluation.py       # Unit tests for evaluation matrix benchmarks
+│
+├── output/                          # Persistent run store
+│   └── api-runs/                    # Run JSONs (frontend_payload, map.geojson, evaluation_report)
+└── package.json                     # Root monorepo scripts
 ```
 
 ---
 
-## 🚀 How to Run the Code
+## 🚀 How to Run the Project
 
-### 1. Install Dependencies
+### 1. Install ML Model Dependencies
 ```bash
+cd ml-model
 pip install -r requirements.txt
+cd ..
 ```
 
-### 2. Run the End-to-End Pipeline
+### 2. Start the Backend API (Node.js / Express / TypeScript)
 ```bash
-python demo.py
+npm run dev:backend
 ```
-This will:
-- Run the 2D Lagrangian particle dispersion simulation across Punjab fires.
-- Evaluate impact probabilities across Delhi-NCR schools.
-- Run the Amazon Bedrock advisory synthesizer and Cedar policy check.
-- Compute the ground-truth evaluation matrix against real-world stations.
-- Export ready-to-use JSON payloads into the `output/` folder.
+The API server starts at `http://127.0.0.1:3000`.
 
-### 3. Start the JavaScript API
-Install Python dependencies first, then run the Node.js API from this repository:
+### 3. Start the Frontend Application (React / Vite)
 ```bash
-npm start
+npm run dev:frontend
 ```
-The API listens on `http://127.0.0.1:3000` by default. Set `PORT`, `HOST`,
-`CORS_ORIGIN`, or `PYTHON_EXECUTABLE` to configure the local service. The API
-uses Node.js built-ins and does not require `npm install`.
-
-Create a replay run with the bundled sample data:
-```bash
-curl -X POST http://127.0.0.1:3000/v1/runs ^
-  -H "Content-Type: application/json" ^
-  -d "{\"mode\":\"replay\",\"snapshot_id\":\"sample\",\"grap_stage\":3}"
-```
-Each API run is stored separately under `output/api-runs/`. The replay endpoint
-returns the combined `prediction` and `advisory` payload consumed by the
-dashboard. Forecasts are decision support only; generated advisories require
-officer review and are never automatically approved by the API.
-
-#### API routes
-
-| Method | Route | Purpose |
-|:---|:---|:---|
-| `GET` | `/health` | Service health |
-| `POST` | `/v1/runs` | Execute the Python pipeline against `snapshot_id: "sample"`; optional `grap_stage` is 1–4 |
-| `GET` | `/v1/runs` | List persisted replay runs |
-| `GET` | `/v1/runs/{run_id}` | Get the composite prediction and advisory payload |
-| `GET` | `/v1/runs/{run_id}/map.geojson` | Get the run's MapLibre FeatureCollection |
-| `GET` | `/v1/advisories/{advisory_id}` | Get an advisory |
-| `GET` | `/v1/evaluation` | Get the latest replay's evaluation report |
-
-The API currently runs the repository's bundled offline sample data only; it
-does not yet ingest live FIRMS/Open-Meteo/OpenAQ data or provide user
-authentication and an approval workflow. The service binds to loopback by
-default. Configure CORS to the exact frontend origin when connecting a browser
-dashboard; do not expose the service publicly without adding authentication and
-deployment controls.
+The React development server starts at `http://127.0.0.1:5173`.
 
 ---
 
-## 📦 Output Files for Backend & Frontend Teams
+## 🧪 Running Automated Tests
 
-When `demo.py` finishes, it writes four JSON files to `output/`:
+Run the complete test suite across both the TypeScript Backend and the Python ML Model:
 
-| Output File | Destination | Description |
+```bash
+# Run backend Express API tests (Node native test runner)
+npm run test:backend
+
+# Run Python ML model tests (Pytest)
+npm run test:model
+
+# Run all test suites
+npm test
+```
+
+---
+
+## 🌐 Full Backend REST API Routes
+
+All endpoints are mounted on the Node.js TypeScript server at `http://127.0.0.1:3000`:
+
+| Method | Route | Description |
 |:---|:---|:---|
-| `prediction.json` | `GET /v1/runs/{id}` → `prediction` | Layer 1 output, school risk assessments, timeline slices (T+0 to T+6h). |
-| `advisory.json` | `GET /v1/advisories/{id}` | Bilingual advisory draft, Cedar and claim checks, and publication status. |
-| `map.geojson` | `GET /v1/runs/{id}/map.geojson` | MapLibre-ready FeatureCollection (fire points, plume polygons, school pins). |
-| `frontend_payload.json` | Composite API | Combined contract ready for immediate dashboard rendering. |
-| `evaluation_report.json` | `GET /v1/evaluation` | Real-world evaluation report comparing predictions against ground stations. |
+| `GET` | `/health` | Service health status and pipeline details |
+| `GET` | `/v1/config` | Physical constants, diffusion coefficients, and scoring weights |
+| `POST` | `/v1/runs` | Execute end-to-end physics forecast & policy-checked advisory |
+| `GET` | `/v1/runs` | List persisted runs (`?severity=HIGH&grap_stage=3&limit=10`) |
+| `GET` | `/v1/runs/{id}` | Composite frontend payload (`{ prediction, advisory }`) |
+| `GET` | `/v1/runs/{id}/prediction` | Layer 1 predictive output object |
+| `GET` | `/v1/runs/{id}/advisory` | Layer 2 bilingual advisory object |
+| `GET` | `/v1/runs/{id}/map.geojson` | MapLibre-ready FeatureCollection |
+| `GET` | `/v1/runs/{id}/timeline` | Hourly animation time-slices (T+0 to T+6h) |
+| `GET` | `/v1/runs/{id}/timeline/{h}` | Single hourly slice (e.g. `/v1/runs/{id}/timeline/3`) |
+| `GET` | `/v1/runs/{id}/schools` | School risk rankings (`?risk_band=HIGH&district=North+West+Delhi`) |
+| `GET` | `/v1/runs/{id}/ensemble` | 3-member physical ensemble scenarios |
+| `POST` | `/v1/predict/simulate` | Direct Layer 1 simulation without advisory step |
+| `GET` | `/v1/advisories` | List all generated advisories across runs |
+| `GET` | `/v1/advisories/{id}` | Get advisory by ID |
+| `POST` / `PATCH` | `/v1/advisories/{id}/review` | Human officer review gate (`action: "APPROVE" \| "REJECT"`, `officer_id`, `notes`) |
+| `GET` | `/v1/policy/grap` | Statutory CAQM GRAP schedule catalog (Stages I–IV) |
+| `POST` | `/v1/policy/evaluate` | Deterministic AWS Cedar policy authorizer evaluation |
+| `POST` | `/v1/claims/validate` | Anti-hallucination claim validator |
+| `GET` | `/v1/evaluation` | Latest backtest evaluation report against ground stations |
+| `POST` | `/v1/evaluation/evaluate` | Compute custom evaluation matrix |
+| `GET` | `/v1/data/schools` | OSM Delhi-NCR school coordinates |
+| `GET` | `/v1/data/fires` | NASA FIRMS VIIRS active fire hotspots |
+| `GET` | `/v1/data/weather` | Open-Meteo GFS North-Westerly wind field |
 
 ---
 
@@ -136,13 +172,3 @@ When `demo.py` finishes, it writes four JSON files to `output/`:
 | **False Alarm Ratio (FAR)** | $\frac{\text{False Alarms}}{\text{Hits} + \text{False Alarms}}$ | $\le 0.30$ | **$0.17$ ($17\%$)** |
 | **Critical Success Index (CSI)** | $\frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarms}}$ | $\ge 0.50$ | **$0.77$** |
 | **Ensemble Envelope Reliability** | % of observed spikes enclosed | $\ge 80\%$ | **$95\%$** |
-
----
-
-## ☁️ AWS Architecture Mapping
-
-- **Amazon Bedrock**: Powering the grounded bilingual advisory agent (`amazon.nova-micro-v1:0` / `anthropic.claude-3-haiku`).
-- **AWS Cedar**: Open-source deterministic policy engine enforcing CAQM GRAP legal constraints before publishing.
-- **AWS Lambda + EventBridge**: Scheduled execution every 3 hours.
-- **Amazon S3**: Storing raw satellite snapshots and raster numpy arrays.
-- **Amazon DynamoDB**: Storing school risk states and advisory audit trails.

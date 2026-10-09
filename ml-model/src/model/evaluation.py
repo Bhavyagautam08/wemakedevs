@@ -7,7 +7,7 @@ ground station PM2.5 observations (OpenAQ / CAAQMS).
 from typing import List, Dict, Any, Tuple
 from datetime import datetime, timedelta, timezone
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class StationObservation(BaseModel):
@@ -37,18 +37,21 @@ class ContingencyTable(BaseModel):
     false_alarms: int = 0
     correct_negatives: int = 0
 
+    @computed_field
     @property
     def probability_of_detection(self) -> float:
         """Hit Rate / Recall: Hits / (Hits + Misses)"""
         denom = self.hits + self.misses
         return round(self.hits / denom, 3) if denom > 0 else 0.0
 
+    @computed_field
     @property
     def false_alarm_ratio(self) -> float:
         """FAR: False Alarms / (Hits + False Alarms)"""
         denom = self.hits + self.false_alarms
         return round(self.false_alarms / denom, 3) if denom > 0 else 0.0
 
+    @computed_field
     @property
     def critical_success_index(self) -> float:
         """CSI / Threat Score: Hits / (Hits + Misses + False Alarms)"""

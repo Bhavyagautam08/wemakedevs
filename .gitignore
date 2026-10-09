@@ -1,7 +1,13 @@
-# Python bytecode
+# Node.js
+node_modules/
+dist/
+.npm/
+
+# Python bytecode & cache
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Virtual environments
 .venv/
@@ -17,3 +23,10 @@ env/
 # OS generated
 .DS_Store
 Thumbs.db
+
+# Temp runtime directories
+output/.api-work-*
+output/.sim-*
+output/.genadv-*
+output/.review-*
+output/api-runs/

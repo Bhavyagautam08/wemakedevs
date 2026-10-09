@@ -1,5 +1,5 @@
 {
-  "advisory_id": "adv_20261009_pred_20261008_2200_delhincr",
+  "advisory_id": "adv_20261009_pred_20261009_144451314708_delhincr",
   "severity": "MODERATE",
   "headline": {
     "en": "Smoke Corridor Precautionary Advisory: North West Delhi",
@@ -14,8 +14,8 @@
     "school_count": 0
   },
   "time_window": {
-    "start": "2026-10-08T22:00:00Z",
-    "end": "2026-10-09T04:00:00Z"
+    "start": "2026-10-09T14:44:51.314708Z",
+    "end": "2026-10-09T20:44:51.314708Z"
   },
   "recommended_actions": [],
   "risk": {
@@ -24,7 +24,7 @@
   },
   "evidence": [
     {
-      "source_id": "pred_20261008_2200_delhincr",
+      "source_id": "pred_20261009_144451314708_delhincr",
       "type": "model_prediction"
     },
     {
@@ -39,7 +39,7 @@
     "rejection_reason": "Proposed actions exceeded current GRAP statutory authorization."
   },
   "model_metadata": {
-    "prediction_id": "pred_20261008_2200_delhincr",
+    "prediction_id": "pred_20261009_144451314708_delhincr",
     "model_version": "1.0.0",
     "cedar_policy_version": "2025_11_21",
     "bedrock_model": "amazon.nova-micro-v1:0"
