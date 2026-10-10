@@ -1,47 +1,1432 @@
 [
   {
-    "detection_id": "viirs_snpp_20261008_01",
-    "latitude": 30.245,
-    "longitude": 75.842,
-    "acq_timestamp": "2026-10-08T20:30:00Z",
-    "confidence": 92.0,
-    "frp": 142.5,
-    "satellite": "VIIRS_SNPP_NRT"
+    "detection_id": "firms_N_2026-10-10_0720_0",
+    "latitude": 13.7129,
+    "longitude": 79.92241,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.13,
+    "satellite": "N"
   },
   {
-    "detection_id": "viirs_snpp_20261008_02",
-    "latitude": 30.261,
-    "longitude": 75.865,
-    "acq_timestamp": "2026-10-08T20:30:00Z",
-    "confidence": 88.0,
-    "frp": 210.0,
-    "satellite": "VIIRS_SNPP_NRT"
+    "detection_id": "firms_N_2026-10-10_0720_1",
+    "latitude": 14.68558,
+    "longitude": 79.04055,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.19,
+    "satellite": "N"
   },
   {
-    "detection_id": "viirs_snpp_20261008_03",
-    "latitude": 30.231,
-    "longitude": 75.819,
-    "acq_timestamp": "2026-10-08T20:30:00Z",
-    "confidence": 95.0,
-    "frp": 380.2,
-    "satellite": "VIIRS_SNPP_NRT"
+    "detection_id": "firms_N_2026-10-10_0720_2",
+    "latitude": 14.6896,
+    "longitude": 79.04317,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.33,
+    "satellite": "N"
   },
   {
-    "detection_id": "viirs_noaa20_20261008_04",
-    "latitude": 30.312,
-    "longitude": 75.954,
-    "acq_timestamp": "2026-10-08T20:45:00Z",
-    "confidence": 84.0,
-    "frp": 165.8,
-    "satellite": "VIIRS_NOAA20_NRT"
+    "detection_id": "firms_N_2026-10-10_0720_3",
+    "latitude": 15.826,
+    "longitude": 78.5631,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.62,
+    "satellite": "N"
   },
   {
-    "detection_id": "viirs_noaa20_20261008_05",
-    "latitude": 30.198,
-    "longitude": 75.782,
-    "acq_timestamp": "2026-10-08T20:45:00Z",
+    "detection_id": "firms_N_2026-10-10_0720_5",
+    "latitude": 16.7106,
+    "longitude": 79.56401,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.13,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0720_6",
+    "latitude": 16.71265,
+    "longitude": 79.56141,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.83,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0720_7",
+    "latitude": 17.51421,
+    "longitude": 80.86212,
+    "acq_timestamp": "2026-10-10T07:20:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.48,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_12",
+    "latitude": 18.77385,
+    "longitude": 77.88631,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.73,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_13",
+    "latitude": 20.86868,
+    "longitude": 84.99372,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.53,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_14",
+    "latitude": 20.88772,
+    "longitude": 84.98141,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.99,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_15",
+    "latitude": 20.89034,
+    "longitude": 84.98224,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.66,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_16",
+    "latitude": 20.96361,
+    "longitude": 85.1885,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.1,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_17",
+    "latitude": 20.96954,
+    "longitude": 85.1753,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.99,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_18",
+    "latitude": 20.97691,
+    "longitude": 85.16965,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.16,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_20",
+    "latitude": 21.07791,
+    "longitude": 85.03944,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.03,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_21",
+    "latitude": 21.08126,
+    "longitude": 85.03467,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.55,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_22",
+    "latitude": 22.0543,
+    "longitude": 88.12619,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.92,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_23",
+    "latitude": 22.20886,
+    "longitude": 84.86267,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.84,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_24",
+    "latitude": 22.37751,
+    "longitude": 87.27821,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 9.09,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_25",
+    "latitude": 22.47655,
+    "longitude": 77.20538,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.34,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_26",
+    "latitude": 22.57315,
+    "longitude": 85.89327,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 6.23,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_27",
+    "latitude": 22.61766,
+    "longitude": 77.02944,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 4.41,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_28",
+    "latitude": 22.72902,
+    "longitude": 78.05084,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.97,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_29",
+    "latitude": 23.4074,
+    "longitude": 77.51556,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.24,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_31",
+    "latitude": 23.55941,
+    "longitude": 87.23892,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.61,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_34",
+    "latitude": 23.64903,
+    "longitude": 85.44033,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.71,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_35",
+    "latitude": 23.67567,
+    "longitude": 86.39896,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 7.39,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_36",
+    "latitude": 23.68574,
+    "longitude": 86.39211,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 4.32,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_37",
+    "latitude": 23.77931,
+    "longitude": 86.38882,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.01,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_41",
+    "latitude": 24.29627,
+    "longitude": 77.95662,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.78,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_43",
+    "latitude": 24.29814,
+    "longitude": 77.9525,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.28,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_45",
+    "latitude": 24.47384,
+    "longitude": 77.99413,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.01,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_46",
+    "latitude": 24.60744,
+    "longitude": 77.86328,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.63,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_47",
+    "latitude": 24.75796,
+    "longitude": 76.78448,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.24,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_49",
+    "latitude": 24.97135,
+    "longitude": 77.91965,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 4.05,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_50",
+    "latitude": 24.97713,
+    "longitude": 77.91806,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.05,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_51",
+    "latitude": 25.02673,
+    "longitude": 77.81561,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.0,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_53",
+    "latitude": 25.85443,
+    "longitude": 94.90498,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.6,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_54",
+    "latitude": 25.87922,
+    "longitude": 94.94186,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.09,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_55",
+    "latitude": 25.8797,
+    "longitude": 94.94588,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.09,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_56",
+    "latitude": 25.8803,
+    "longitude": 94.9419,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.93,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_57",
+    "latitude": 25.88319,
+    "longitude": 94.89576,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.19,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_58",
+    "latitude": 25.95782,
+    "longitude": 92.79996,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.76,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_59",
+    "latitude": 26.03021,
+    "longitude": 92.76527,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.43,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_60",
+    "latitude": 26.21014,
+    "longitude": 91.09039,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.48,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_61",
+    "latitude": 26.40439,
+    "longitude": 88.81522,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.37,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_62",
+    "latitude": 26.78154,
+    "longitude": 88.86569,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 1.35,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_63",
+    "latitude": 26.83517,
+    "longitude": 93.93751,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 29.63,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0722_64",
+    "latitude": 27.66035,
+    "longitude": 94.92754,
+    "acq_timestamp": "2026-10-10T07:22:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.55,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_65",
+    "latitude": 24.91193,
+    "longitude": 76.99849,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.45,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_66",
+    "latitude": 24.99299,
+    "longitude": 77.14095,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.01,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_67",
+    "latitude": 25.02676,
+    "longitude": 76.3254,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.84,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_68",
+    "latitude": 25.23353,
+    "longitude": 76.11811,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.42,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_69",
+    "latitude": 25.43646,
+    "longitude": 76.77636,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.09,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_70",
+    "latitude": 25.43827,
+    "longitude": 76.77922,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.18,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_71",
+    "latitude": 25.58393,
+    "longitude": 78.4012,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.73,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_72",
+    "latitude": 26.33994,
+    "longitude": 77.66582,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.55,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_73",
+    "latitude": 26.57818,
+    "longitude": 78.43921,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.08,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_74",
+    "latitude": 27.38452,
+    "longitude": 82.37364,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.35,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_75",
+    "latitude": 27.55764,
+    "longitude": 76.01072,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.95,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0724_76",
+    "latitude": 29.98165,
+    "longitude": 73.77419,
+    "acq_timestamp": "2026-10-10T07:24:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.65,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0726_101",
+    "latitude": 31.3077,
+    "longitude": 74.83342,
+    "acq_timestamp": "2026-10-10T07:26:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.81,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_113",
+    "latitude": 12.07597,
+    "longitude": 79.20793,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.78,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_114",
+    "latitude": 13.15728,
+    "longitude": 80.28926,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.68,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_115",
+    "latitude": 13.15895,
+    "longitude": 80.28656,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.14,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_116",
+    "latitude": 13.5914,
+    "longitude": 79.4677,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.19,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_117",
+    "latitude": 13.70572,
+    "longitude": 79.92293,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.74,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_118",
+    "latitude": 13.71242,
+    "longitude": 79.92227,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 9.45,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0900_119",
+    "latitude": 13.94743,
+    "longitude": 77.42716,
+    "acq_timestamp": "2026-10-10T09:00:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.14,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_120",
+    "latitude": 15.65574,
+    "longitude": 75.80434,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.23,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_121",
+    "latitude": 19.38368,
+    "longitude": 77.27479,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.55,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_122",
+    "latitude": 20.08208,
+    "longitude": 75.15111,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.34,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_123",
+    "latitude": 20.7683,
+    "longitude": 75.33061,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.31,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_124",
+    "latitude": 20.76899,
+    "longitude": 75.33121,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.57,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_125",
+    "latitude": 21.10637,
+    "longitude": 72.64308,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 9.0,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_126",
+    "latitude": 21.10695,
+    "longitude": 72.64809,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 9.0,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_127",
+    "latitude": 21.17801,
+    "longitude": 76.1504,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.35,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_128",
+    "latitude": 21.48355,
+    "longitude": 70.86647,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.42,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_129",
+    "latitude": 21.69179,
+    "longitude": 76.28136,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.26,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_130",
+    "latitude": 21.69318,
+    "longitude": 76.2816,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 1.35,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_131",
+    "latitude": 21.81286,
+    "longitude": 76.39643,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.51,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_132",
+    "latitude": 21.81325,
+    "longitude": 76.40102,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.51,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_133",
+    "latitude": 21.81475,
+    "longitude": 76.39737,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.45,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_134",
+    "latitude": 21.81516,
+    "longitude": 76.40194,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 4.38,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_135",
+    "latitude": 21.83906,
+    "longitude": 70.39404,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.56,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_136",
+    "latitude": 22.20711,
+    "longitude": 77.14661,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 4.46,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_137",
+    "latitude": 22.20879,
+    "longitude": 77.14512,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.23,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_138",
+    "latitude": 22.31956,
+    "longitude": 77.24088,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 1.88,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_139",
+    "latitude": 22.32156,
+    "longitude": 77.24118,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.75,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_140",
+    "latitude": 22.48431,
+    "longitude": 77.0564,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.9,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_141",
+    "latitude": 22.53236,
+    "longitude": 77.28555,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.32,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_142",
+    "latitude": 22.54039,
+    "longitude": 77.22636,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.81,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_143",
+    "latitude": 22.57108,
+    "longitude": 77.06132,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 2.7,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_144",
+    "latitude": 22.5777,
+    "longitude": 77.06583,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.14,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_145",
+    "latitude": 22.6106,
+    "longitude": 77.27526,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.25,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_146",
+    "latitude": 22.6563,
+    "longitude": 77.13316,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 3.71,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_147",
+    "latitude": 22.70747,
+    "longitude": 75.13893,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 1.14,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_148",
+    "latitude": 22.7351,
+    "longitude": 77.40491,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.2,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_149",
+    "latitude": 22.7381,
+    "longitude": 77.40731,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.93,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_150",
+    "latitude": 22.7516,
+    "longitude": 77.41713,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 5.99,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_151",
+    "latitude": 22.75545,
+    "longitude": 77.41967,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.15,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_152",
+    "latitude": 22.83098,
+    "longitude": 77.37163,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.56,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0902_153",
+    "latitude": 22.83327,
+    "longitude": 77.37058,
+    "acq_timestamp": "2026-10-10T09:02:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.9,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_154",
+    "latitude": 23.05732,
+    "longitude": 71.37978,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 30.0,
+    "confidence_class": "l",
+    "frp": 1.98,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_155",
+    "latitude": 23.12058,
+    "longitude": 70.08521,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 1.88,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_156",
+    "latitude": 23.16484,
+    "longitude": 75.3416,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 1.63,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_157",
+    "latitude": 23.40696,
+    "longitude": 69.59949,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.03,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_158",
+    "latitude": 23.48698,
+    "longitude": 75.15175,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.03,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_159",
+    "latitude": 23.63535,
+    "longitude": 68.53159,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.92,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_160",
+    "latitude": 23.63738,
+    "longitude": 68.53287,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.23,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_161",
+    "latitude": 24.03847,
+    "longitude": 72.04743,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.37,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_162",
+    "latitude": 24.03908,
+    "longitude": 72.04536,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.99,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_163",
+    "latitude": 24.04306,
+    "longitude": 72.04686,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.37,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_164",
+    "latitude": 24.04367,
+    "longitude": 72.04478,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.19,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_165",
+    "latitude": 24.05169,
+    "longitude": 77.79554,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.74,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_166",
+    "latitude": 24.05211,
+    "longitude": 77.80167,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 8.98,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_167",
+    "latitude": 24.05277,
+    "longitude": 77.79788,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 12.84,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_168",
+    "latitude": 24.69087,
+    "longitude": 77.06981,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.45,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_169",
+    "latitude": 24.69292,
+    "longitude": 77.06631,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.24,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_170",
+    "latitude": 24.88112,
+    "longitude": 76.85411,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.97,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_171",
+    "latitude": 24.89217,
+    "longitude": 76.83171,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 6.2,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_172",
+    "latitude": 24.8947,
+    "longitude": 76.83001,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 5.72,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_173",
+    "latitude": 24.93871,
+    "longitude": 77.16077,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 10.55,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_174",
+    "latitude": 24.94002,
+    "longitude": 77.15698,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 9.11,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_175",
+    "latitude": 25.06623,
+    "longitude": 76.91801,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.58,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_176",
+    "latitude": 25.18127,
+    "longitude": 73.25211,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 10.8,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_177",
+    "latitude": 25.21633,
+    "longitude": 76.27978,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.57,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_178",
+    "latitude": 25.22713,
+    "longitude": 76.99715,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.56,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_181",
+    "latitude": 25.78384,
+    "longitude": 73.70322,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
     "confidence": 90.0,
-    "frp": 290.4,
-    "satellite": "VIIRS_NOAA20_NRT"
+    "confidence_class": "h",
+    "frp": 4.77,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_183",
+    "latitude": 26.34705,
+    "longitude": 77.65031,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.17,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_184",
+    "latitude": 26.6561,
+    "longitude": 73.81842,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 1.3,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_185",
+    "latitude": 27.4168,
+    "longitude": 70.83527,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.54,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0905_192",
+    "latitude": 29.95216,
+    "longitude": 76.09425,
+    "acq_timestamp": "2026-10-10T09:05:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.84,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_243",
+    "latitude": 30.78575,
+    "longitude": 74.30927,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.37,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_257",
+    "latitude": 31.352,
+    "longitude": 74.90054,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.48,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_258",
+    "latitude": 31.35475,
+    "longitude": 74.90337,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.66,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_259",
+    "latitude": 31.44774,
+    "longitude": 75.10178,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.59,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_261",
+    "latitude": 31.48111,
+    "longitude": 74.86578,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 3.33,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_262",
+    "latitude": 31.48397,
+    "longitude": 74.86421,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.41,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_263",
+    "latitude": 31.4944,
+    "longitude": 75.04579,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.02,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_264",
+    "latitude": 31.49632,
+    "longitude": 74.97421,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 4.63,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_268",
+    "latitude": 31.776,
+    "longitude": 75.25397,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 7.83,
+    "satellite": "N"
+  },
+  {
+    "detection_id": "firms_N_2026-10-10_0907_269",
+    "latitude": 31.80814,
+    "longitude": 74.93626,
+    "acq_timestamp": "2026-10-10T09:07:00Z",
+    "confidence": 60.0,
+    "confidence_class": "n",
+    "frp": 2.88,
+    "satellite": "N"
   }
 ]

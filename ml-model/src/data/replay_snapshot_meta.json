@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-10-10T19:07:13.759150+00:00",
+  "t0": "2026-10-10T10:00:00+00:00",
+  "fires": {
+    "source": "NASA FIRMS VIIRS_SNPP_NRT area API, 1 day, India bbox 68.0,6.5,97.5,37.5, filtered to India (Natural Earth 1:10m boundary)",
+    "count": 143,
+    "acq_range": [
+      "2026-10-10T07:20:00+00:00",
+      "2026-10-10T09:07:00+00:00"
+    ]
+  },
+  "weather": {
+    "source": "Open-Meteo gfs_seamless hourly",
+    "points": 340,
+    "records": 4760
+  }
+}

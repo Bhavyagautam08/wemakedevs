@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { createApp } from "../src/app";
+import { buildSyntheticEvaluationFixture } from "./evaluation.fixture";
 
 let server: any;
 let baseUrl: string;
@@ -98,8 +99,28 @@ test("POST /v1/claims/validate classifies factual statements", async () => {
   assert.equal(((await unsafeResp.json()) as any).is_valid, false);
 });
 
-test("GET /v1/evaluation returns evaluation report", async () => {
+test("GET /v1/evaluation reports that no validated backtest exists", async () => {
   const response = await fetch(`${baseUrl}/v1/evaluation`);
+  assert.equal(response.status, 404);
+  const data = (await response.json()) as any;
+  assert.equal(data.status, "NO_VALIDATED_BACKTEST_AVAILABLE");
+});
+
+test("POST /v1/evaluation/evaluate rejects requests without observations", async () => {
+  const response = await fetch(`${baseUrl}/v1/evaluation/evaluate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  assert.equal(response.status, 400);
+});
+
+test("POST /v1/evaluation/evaluate computes metrics from supplied pairs (synthetic fixture)", async () => {
+  const response = await fetch(`${baseUrl}/v1/evaluation/evaluate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(buildSyntheticEvaluationFixture()),
+  });
   assert.equal(response.status, 200);
   const data = (await response.json()) as any;
   assert.equal(data.station_count, 4);

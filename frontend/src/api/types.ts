@@ -72,6 +72,8 @@ export interface TimelineSlice {
   plume_area_sq_km: number;
   affected_schools_count: number;
   max_intensity: number;
+  peak_concentration_ugm3?: number;
+  particle_count?: number;
   contour_geojson?: any;
   scatter_points?: Array<[number, number, number]>; // [lat, lon, weight]
   corridor_geojson?: any;
@@ -79,6 +81,9 @@ export interface TimelineSlice {
     level: string;
     intensity: string;
     color: string;
+    threshold_ugm3?: number;
+    area_sq_km?: number;
+    polygons?: number[][][];
     coordinates: number[][];
   }>;
 }
@@ -101,7 +106,31 @@ export interface PredictiveOutput {
     total_frp_mw: number;
     source_strength: number;
     source_freshness_hours: number;
+    emission_rate_kg_s?: number;
     status: string;
+  };
+  simulation: {
+    timestep_seconds: number;
+    horizon_hours: number;
+    forecast_horizons: number[];
+    particle_count: number;
+    fire_cluster_count: number;
+    total_emission_rate_kg_s: number;
+    emission_coefficient_kg_per_mj: number;
+    emission_duration_hours: number;
+    concentration_units: string;
+    impact_threshold_ugm3: number;
+    school_source?: string;
+    schools_assessed?: number;
+    footprint_area_sq_km?: number;
+    horizon_states: Array<{
+      horizon_hours: number;
+      particle_count: number;
+      total_mass_kg: number;
+      mixing_height_m: number;
+      centroid_lat?: number;
+      centroid_lon?: number;
+    }>;
   };
   weather: {
     wind_speed_mps: number;
@@ -109,7 +138,19 @@ export interface PredictiveOutput {
     u_mps: number;
     v_mps: number;
     boundary_layer_height_m: number;
-    temperature_c: number;
+    observation_count?: number;
+    station_count?: number;
+    stations?: number[][];
+    spatial_interpolation?: string;
+    at_horizons?: Array<{
+      horizon_hours: number;
+      u_mps: number;
+      v_mps: number;
+      wind_speed_mps: number;
+      wind_direction_deg: number;
+      boundary_layer_height_m: number;
+      precipitation_mm: number;
+    }>;
   };
   ensemble: {
     member_count: number;

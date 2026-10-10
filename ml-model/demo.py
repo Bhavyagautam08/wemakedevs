@@ -15,7 +15,6 @@ if hasattr(sys.stdout, "reconfigure"):
 from src.types import Hotspot, WeatherObservation, School
 from src.pipeline import DhuanAlertPipeline
 from src.model.evaluation import evaluate_model_against_ground_truth
-from tests.test_evaluation import run_evaluation_demo
 
 
 def load_sample_data():
@@ -44,12 +43,13 @@ def main():
     # 1. Load Data
     hotspots, weather, schools = load_sample_data()
     print(f"[✓] Loaded {len(hotspots)} VIIRS active-fire hotspots from Punjab.")
-    print(f"[✓] Loaded North-Westerly wind field: {weather[0].wind_speed_mps} m/s @ {weather[0].wind_direction_deg}°.")
+    print(f"[✓] Loaded {len(weather)} hourly recorded GFS weather records starting {weather[0].forecast_timestamp}.")
     print(f"[✓] Loaded {len(schools)} Delhi-NCR school coordinates.")
 
     # 2. Execute Master Pipeline
     pipeline = DhuanAlertPipeline()
-    now = datetime.now(timezone.utc)
+    # Replay T0 = first hour of the recorded weather series
+    now = min(w.forecast_timestamp for w in weather)
     payload = pipeline.run(
         hotspots=hotspots,
         weather=weather,
@@ -92,18 +92,11 @@ def main():
     print(f"Claim Validation  : {adv.validation.claim_check}")
     print(f"Publication Status: {adv.validation.publication_status}")
 
-    # 4. Run Real-World Evaluation Matrix
+    # 4. Evaluation: no historical backtest against real station data exists yet
     print("\n" + "-" * 70)
-    print("LAYER 3: REAL-WORLD GROUND TRUTH EVALUATION MATRIX")
+    print("LAYER 3: EVALUATION")
     print("-" * 70)
-    eval_report = run_evaluation_demo()
-    print(f"Spearman Correlation (rho) : {eval_report.spearman_rho} (Strong signal)")
-    print(f"Median Arrival Lag         : {eval_report.median_arrival_lag_hours} hours")
-    print(f"Probability of Detection   : {eval_report.contingency.probability_of_detection * 100:.1f}%")
-    print(f"False Alarm Ratio (FAR)    : {eval_report.contingency.false_alarm_ratio * 100:.1f}%")
-    print(f"Critical Success Index     : {eval_report.contingency.critical_success_index:.3f}")
-    print(f"Ensemble Capture Rate      : {eval_report.envelope_capture_rate * 100:.1f}%")
-    print(f"Operational Verdict        : {eval_report.operational_verdict}")
+    print("NOT_VALIDATED: no hindcast against real CAAQMS/OpenAQ observations has been run.")
 
     # 5. Export JSON Files for Backend and Frontend
     out_dir = os.environ.get(
@@ -125,7 +118,7 @@ def main():
         f.write(payload.model_dump_json(indent=2))
 
     with open(os.path.join(out_dir, "evaluation_report.json"), "w", encoding="utf-8") as f:
-        f.write(eval_report.model_dump_json(indent=2))
+        json.dump({"status": "NOT_VALIDATED", "report": None}, f, indent=2)
 
     print("\n" + "=" * 70)
     print(f"[✓] SUCCESS! Exported complete JSON files to: {out_dir}")
@@ -133,7 +126,7 @@ def main():
     print("    - advisory.json          (Layer 2 Bilingual GenAI output)")
     print("    - map.geojson            (MapLibre FeatureCollection)")
     print("    - frontend_payload.json  (Combined API contract)")
-    print("    - evaluation_report.json (Ground-truth evaluation metrics)")
+    print("    - evaluation_report.json (NOT_VALIDATED status only)")
     print("=" * 70)
 
 

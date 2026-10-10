@@ -156,22 +156,30 @@ All endpoints are mounted on the Node.js TypeScript server at `http://127.0.0.1:
 | `GET` | `/v1/policy/grap` | Statutory CAQM GRAP schedule catalog (Stages I–IV) |
 | `POST` | `/v1/policy/evaluate` | Deterministic AWS Cedar policy authorizer evaluation |
 | `POST` | `/v1/claims/validate` | Anti-hallucination claim validator |
-| `GET` | `/v1/evaluation` | Latest backtest evaluation report against ground stations |
-| `POST` | `/v1/evaluation/evaluate` | Compute custom evaluation matrix |
+| `GET` | `/v1/evaluation` | Latest evaluation against real station data (`404 NO_VALIDATED_BACKTEST_AVAILABLE` until one exists) |
+| `POST` | `/v1/evaluation/evaluate` | Compute metrics from supplied `forecasts` + `observations` (400 without them) |
 | `GET` | `/v1/data/schools` | Bundled school reference coordinates (not used by the live dashboard) |
-| `GET` | `/v1/data/fires` | NASA FIRMS VIIRS active fire hotspots |
-| `GET` | `/v1/data/weather` | Open-Meteo GFS North-Westerly wind field |
+| `GET` | `/v1/data/fires` | Live NASA FIRMS VIIRS hotspots (Punjab–Haryana–Delhi corridor bbox) |
+| `GET` | `/v1/data/weather` | Live Open-Meteo GFS hourly series at the strongest live fire cluster |
 | `GET` | `/v1/data/live` | Live fire and weather data plus per-source availability |
 
 ---
 
 ## 📊 Ground-Truth Evaluation Matrix
 
-| Validation Metric | Scientific Formula / Definition | Target | DhuanAlert Backtest Result |
-|:---|:---|:---:|:---:|
-| **Arrival Time Lag ($|\Delta t|$)** | $\|t_{\text{pred}}(\text{Index} \ge 40) - t_{\text{obs}}(\Delta\text{PM}_{2.5} \ge 50)\|$ | $\le 2.5\text{ h}$ | **$1.0\text{ hour}$** |
-| **Spearman Rank ($\rho$)** | $\rho(\text{Model Index}, \Delta\text{PM}_{2.5})$ | $0.40\text{--}0.70$ | **$0.68$** |
-| **Probability of Detection (POD)** | $\frac{\text{Hits}}{\text{Hits} + \text{Misses}}$ | $\ge 0.75$ | **$0.91$ ($91\%$)** |
-| **False Alarm Ratio (FAR)** | $\frac{\text{False Alarms}}{\text{Hits} + \text{False Alarms}}$ | $\le 0.30$ | **$0.17$ ($17\%$)** |
-| **Critical Success Index (CSI)** | $\frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarms}}$ | $\ge 0.50$ | **$0.77$** |
-| **Ensemble Envelope Reliability** | % of observed spikes enclosed | $\ge 80\%$ | **$95\%$** |
+> **Status: NOT VALIDATED.** No hindcast against real CAAQMS/OpenAQ station observations has been run yet.
+> Earlier versions of this README listed backtest numbers; those were the deterministic output of a synthetic
+> test fixture, not a historical validation, and have been removed. `GET /v1/evaluation` returns
+> `404 NO_VALIDATED_BACKTEST_AVAILABLE` until real forecast/observation pairs are evaluated.
+
+The metric code (`ml-model/src/model/evaluation.py`, `backend/src/services/evaluation.service.ts`) is in place and will
+report the following once fed real data:
+
+| Validation Metric | Scientific Formula / Definition | Target |
+|:---|:---|:---:|
+| **Arrival Time Lag ($|\Delta t|$)** | $\|t_{\text{pred}}(\text{Index} \ge 40) - t_{\text{obs}}(\Delta\text{PM}_{2.5} \ge 50)\|$ | $\le 2.5\text{ h}$ |
+| **Spearman Rank ($\rho$)** | $\rho(\text{Model Index}, \Delta\text{PM}_{2.5})$ | $0.40\text{--}0.70$ |
+| **Probability of Detection (POD)** | $\frac{\text{Hits}}{\text{Hits} + \text{Misses}}$ | $\ge 0.75$ |
+| **False Alarm Ratio (FAR)** | $\frac{\text{False Alarms}}{\text{Hits} + \text{False Alarms}}$ | $\le 0.30$ |
+| **Critical Success Index (CSI)** | $\frac{\text{Hits}}{\text{Hits} + \text{Misses} + \text{False Alarms}}$ | $\ge 0.50$ |
+| **Ensemble Envelope Reliability** | % of observed spikes enclosed | $\ge 80\%$ |

@@ -36,8 +36,10 @@ from src.model.evaluation import (
     EvaluationReport,
     evaluate_model_against_ground_truth,
 )
-from tests.test_evaluation import run_evaluation_demo
 
+
+class EvaluationUnavailableError(ValueError):
+    """Raised when evaluation is requested without real forecast/observation pairs."""
 
 from src.data_sources import NasaFirmsClient, OpenMeteoClient, OpenAqWaqiClient, OsmSchoolClient
 
@@ -78,29 +80,83 @@ class DhuanAlertService:
     def get_live_fires(self) -> List[Hotspot]:
         return self.firms_client.fetch_active_fires()
 
-    def get_live_weather(self) -> List[WeatherObservation]:
-        return self.weather_client.fetch_forecast()
+    def get_live_weather(self, latitude: float, longitude: float) -> List[WeatherObservation]:
+        return self.weather_client.fetch_forecast(latitude=latitude, longitude=longitude)
+
+    def primary_fire_location(self, hotspots: List[Hotspot], now: datetime) -> Tuple[float, float]:
+        """Centroid of the strongest fire cluster: the point at which weather is fetched."""
+        clusters = self.layer1.source_model.cluster_hotspots(hotspots, current_time=now)
+        if not clusters:
+            raise ValueError("INSUFFICIENT_DATA: Hotspots produced no fire clusters to fetch weather for.")
+        return clusters[0].centroid_lat, clusters[0].centroid_lon
+
+    # Weather sampling for the spatially varying wind field
+    WEATHER_GRID_STEP_DEG = 1.0
+    WEATHER_GRID_REACH_CELLS = 1  # grid points within +-1 cell (~110 km) of each cluster
+    WEATHER_MAX_CLUSTER_POINTS = 10
+
+    def weather_points_for(self, hotspots: List[Hotspot], now: datetime) -> List[Tuple[float, float]]:
+        """
+        Forecast points: the regular 1-degree grid points within WEATHER_GRID_REACH_CELLS of
+        any fire cluster (room for ~9 h of plume travel), plus the centroids of the strongest
+        clusters. Scales with where fires are, so India-wide runs stay a few hundred points.
+        """
+        import math as _m
+        step, reach = self.WEATHER_GRID_STEP_DEG, self.WEATHER_GRID_REACH_CELLS
+        clusters = self.layer1.source_model.cluster_hotspots(hotspots, current_time=now)
+        grid = set()
+        for c in clusters:
+            i0, j0 = _m.floor(c.centroid_lat / step), _m.floor(c.centroid_lon / step)
+            for di in range(-reach, reach + 2):
+                for dj in range(-reach, reach + 2):
+                    grid.add(((i0 + di) * step, (j0 + dj) * step))
+        points = sorted(grid)
+        points += [(c.centroid_lat, c.centroid_lon) for c in clusters[: self.WEATHER_MAX_CLUSTER_POINTS]]
+        return points
+
+    def get_live_weather_field(self, hotspots: List[Hotspot], now: datetime) -> List[WeatherObservation]:
+        return self.weather_client.fetch_forecast_points(self.weather_points_for(hotspots, now))
+
+    def get_replay_inputs(self) -> Tuple[List[Hotspot], List[WeatherObservation], datetime]:
+        """
+        Bundled replay snapshot. The run time T0 is the first hour of the recorded
+        weather series, so the simulation uses the weather that applied at that time.
+        """
+        hotspots = self.get_sample_fires()
+        weather = self.get_sample_weather()
+        t0 = min(w.forecast_timestamp for w in weather)
+        return hotspots, weather, t0
 
     def get_live_data_snapshot(self) -> Dict[str, Any]:
         """Return only records fetched successfully from live data providers."""
         sources: Dict[str, Dict[str, Any]] = {}
         records: Dict[str, List[Dict[str, Any]]] = {"fires": [], "weather": []}
 
-        for name, fetch, target in (
-            ("NASA FIRMS", self.get_live_fires, "fires"),
-            ("Open-Meteo", self.get_live_weather, "weather"),
-        ):
-            try:
-                fetched = fetch()
-                records[target] = [item.model_dump(mode="json") for item in fetched]
-                sources[target] = {"name": name, "status": "ok", "count": len(fetched)}
-            except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
-                sources[target] = {
-                    "name": name,
-                    "status": "error",
-                    "count": 0,
-                    "error": str(error),
-                }
+        errors = (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError)
+
+        try:
+            fires = self.get_live_fires()
+            records["fires"] = [item.model_dump(mode="json") for item in fires]
+            sources["fires"] = {"name": "NASA FIRMS", "status": "ok", "count": len(fires)}
+        except errors as error:
+            fires = []
+            sources["fires"] = {"name": "NASA FIRMS", "status": "error", "count": 0, "error": str(error)}
+
+        # Weather is queried at the strongest fire cluster; with no fires there is no location.
+        try:
+            if not fires:
+                raise ValueError("No live fire detections, so there is no fire location to query weather for.")
+            lat, lon = self.primary_fire_location(fires, datetime.now(timezone.utc))
+            weather = self.get_live_weather(lat, lon)
+            records["weather"] = [item.model_dump(mode="json") for item in weather]
+            sources["weather"] = {
+                "name": "Open-Meteo",
+                "status": "ok",
+                "count": len(weather),
+                "query_location": {"latitude": lat, "longitude": lon},
+            }
+        except errors as error:
+            sources["weather"] = {"name": "Open-Meteo", "status": "error", "count": 0, "error": str(error)}
 
         return {
             "fetched_at": datetime.now(timezone.utc).isoformat(),
@@ -136,22 +192,31 @@ class DhuanAlertService:
         run_timestamp: Optional[datetime] = None,
     ) -> Dict[str, Any]:
         """
-        Executes complete forecast pipeline and computes evaluation matrix.
-        Supports 'replay' (bundled snapshot), 'live' (NASA FIRMS + Open-Meteo), or 'custom'.
+        Executes the complete forecast pipeline.
+        Modes: 'live' (NASA FIRMS + Open-Meteo at the fire centroid, T0 = now),
+        'replay' (bundled recorded snapshot, T0 = snapshot start), or 'custom'
+        (caller supplies hotspots AND weather, and optionally run_timestamp).
+        Evaluation is never run here: no real observations are paired with a forecast run.
         """
         if mode == "live":
+            now = run_timestamp or datetime.now(timezone.utc)
             hotspots = hotspots or self.get_live_fires()
-            weather = weather or self.get_live_weather()
-            schools = schools or self.get_sample_schools()
-        else:
             if not hotspots:
-                hotspots = self.get_sample_fires()
+                raise ValueError("NO_ACTIVE_FIRES: NASA FIRMS returned zero detections in the corridor bbox.")
             if not weather:
-                weather = self.get_sample_weather()
-            if not schools:
-                schools = self.get_sample_schools()
+                weather = self.get_live_weather_field(hotspots, now)
+        elif mode == "replay":
+            if hotspots or weather:
+                raise ValueError("Replay mode uses the bundled snapshot; use mode='custom' to supply inputs.")
+            hotspots, weather, t0 = self.get_replay_inputs()
+            now = run_timestamp or t0
+        elif mode == "custom":
+            if not hotspots or not weather:
+                raise ValueError("INSUFFICIENT_DATA: custom mode requires both hotspots and weather.")
+            now = run_timestamp or datetime.now(timezone.utc)
+        else:
+            raise ValueError(f"Unknown run mode '{mode}'. Expected live, replay, or custom.")
 
-        now = run_timestamp or datetime.now(timezone.utc)
         payload: FrontendPayload = self.pipeline.run(
             hotspots=hotspots,
             weather=weather,
@@ -159,16 +224,16 @@ class DhuanAlertService:
             grap_stage=grap_stage,
             human_approved=human_approved,
             run_timestamp=now,
+            school_provider=self.schools_client.fetch_schools_in_bboxes,
         )
-
-        evaluation_report: EvaluationReport = run_evaluation_demo()
 
         return {
             "payload": payload,
             "prediction": payload.prediction,
             "advisory": payload.advisory,
             "map": payload.prediction.map_geojson,
-            "evaluation": evaluation_report,
+            "evaluation": None,
+            "evaluation_status": "NOT_VALIDATED",
         }
 
     # =========================================================================
@@ -182,18 +247,20 @@ class DhuanAlertService:
         schools: Optional[List[School]] = None,
         run_timestamp: Optional[datetime] = None,
     ) -> PredictiveOutput:
-        if not hotspots:
-            hotspots = self.get_sample_fires()
-        if not weather:
-            weather = self.get_sample_weather()
-        if not schools:
-            schools = self.get_sample_schools()
+        """Layer 1 only. With no hotspots/weather given, runs the bundled replay snapshot.
+        Without schools, schools are fetched from OpenStreetMap inside the plume footprint."""
+        if not hotspots and not weather:
+            hotspots, weather, t0 = self.get_replay_inputs()
+            run_timestamp = run_timestamp or t0
+        elif not hotspots or not weather:
+            raise ValueError("INSUFFICIENT_DATA: simulate requires both hotspots and weather, or neither (replay).")
 
         return self.layer1.run(
             hotspots=hotspots,
             weather=weather,
             schools=schools,
             run_timestamp=run_timestamp,
+            school_provider=self.schools_client.fetch_schools_in_bboxes,
         )
 
     # =========================================================================
@@ -316,4 +383,6 @@ class DhuanAlertService:
                 index_threshold=index_threshold,
                 delta_pm25_threshold=delta_pm25_threshold,
             )
-        return run_evaluation_demo()
+        raise EvaluationUnavailableError(
+            "NO_VALIDATED_BACKTEST_AVAILABLE: evaluation requires real station forecasts and observations."
+        )

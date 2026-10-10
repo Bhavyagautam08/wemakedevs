@@ -25,7 +25,7 @@ def test_reference_data_loading(service):
 
 
 def test_layer1_simulation(service):
-    pred: PredictiveOutput = service.simulate_layer1()
+    pred: PredictiveOutput = service.simulate_layer1(schools=service.get_sample_schools())
     assert pred.prediction_id.startswith("pred_")
     assert len(pred.timeline) >= 7
     assert pred.timeline[-1].horizon_offset_hours == pred.simulation["horizon_hours"]
@@ -37,7 +37,7 @@ def test_layer1_simulation(service):
 
 
 def test_layer2_advisory_generation_and_review(service):
-    pred = service.simulate_layer1()
+    pred = service.simulate_layer1(schools=service.get_sample_schools())
     adv: AdvisoryOutput = service.generate_advisory(prediction=pred, grap_stage=3, human_approved=False)
 
     assert adv.advisory_id.startswith("adv_")

@@ -6,7 +6,7 @@ and configurable risk scoring weights.
 
 import os
 from typing import Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 def _load_root_env():
@@ -38,7 +38,8 @@ class ProjectionConfig(BaseModel):
 class SimulationConfig(BaseModel):
     """2D Lagrangian particle transport & diffusion parameters."""
     timestep_seconds: int = 900          # 15 minutes (dt)
-    horizon_hours: int = 6               # 6-hour forecast horizon
+    horizon_hours: int = 9               # Total simulated time; must equal max(forecast_horizons)
+    forecast_horizons: list[int] = [3, 6, 9]  # Reported horizons, chained from one continuous run
     particle_count_per_fire: int = 500   # Scalable virtual particles
     base_diffusion_kx: float = 250.0     # Horizontal diffusivity m^2/s
     base_diffusion_ky: float = 250.0     # Horizontal diffusivity m^2/s
@@ -46,6 +47,38 @@ class SimulationConfig(BaseModel):
     decay_rate_lambda: float = 3.2e-5    # ~6-hour half-life (ln(2) / (6 * 3600))
     rain_washout_factor: float = 0.70    # Multiplier applied if rain > 0.2 mm/h
     min_mass_threshold: float = 0.01     # Drop particles with < 1% initial mass
+
+    # --- Emissions (physical units) ---
+    # PM2.5 emission rate E [kg/s] = Ce [kg/MJ] * FRP [MW = MJ/s]. Ce ~0.02-0.03 kg/MJ is the
+    # order of magnitude of smoke emission coefficients for cropland fires
+    # (Ichoku & Kaufman 2005, IEEE TGRS 43(11); FEER v1, Ichoku & Ellison 2014, ACP 14).
+    smoke_emission_coefficient_kg_per_mj: float = 0.025
+    # ASSUMPTION: a detected crop-residue fire keeps emitting at its observed FRP for this long
+    # after T0, released in hourly particle batches.
+    emission_duration_hours: int = 3
+    # ASSUMPTION: e-folding time for a detection's fire still burning at T0 (older detection -> weaker).
+    fire_persistence_efold_hours: float = 10.0
+
+    # --- Concentration (2D box model) ---
+    # Surface concentration C = sum(m_i * K(r_i)) / H, K = normalised 2D Gaussian kernel [1/m^2],
+    # H = max(BLH(t), min_mixing_height_m). A shallower boundary layer -> higher C.
+    kernel_sigma_m: float = 4000.0
+    min_mixing_height_m: float = 100.0
+    # Thresholds on the smoke PM2.5 increment, ug/m^3 (CPCB NAQI PM2.5 breakpoints)
+    trace_threshold_ugm3: float = 15.0      # WHO 2021 24-h PM2.5 guideline; outermost drawn level + school search
+    impact_threshold_ugm3: float = 50.0     # same as the evaluation delta-PM2.5 threshold
+    very_poor_threshold_ugm3: float = 121.0  # CPCB "Very Poor" lower bound
+    severe_threshold_ugm3: float = 250.0     # CPCB "Severe" lower bound; risk normalisation
+
+    @model_validator(mode="after")
+    def _check_horizons(self):
+        if not self.forecast_horizons or sorted(self.forecast_horizons) != self.forecast_horizons:
+            raise ValueError("forecast_horizons must be a non-empty ascending list of hours.")
+        if self.forecast_horizons[-1] != self.horizon_hours:
+            raise ValueError("horizon_hours must equal the last entry of forecast_horizons.")
+        if 3600 % self.timestep_seconds != 0:
+            raise ValueError("timestep_seconds must divide one hour so hourly snapshots align.")
+        return self
 
 
 class RiskScoringWeights(BaseModel):

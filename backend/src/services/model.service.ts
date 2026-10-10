@@ -3,18 +3,44 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { CONFIG, PROJECT_ROOT } from "../config";
+import { ApiError } from "../middleware/errorHandler";
 import { CreateRunRequest, FrontendPayload, EvaluationReport, PredictiveOutput, AdvisoryOutput, LiveDataSnapshot } from "../types";
 
 export interface ModelPipelineResult {
   payload: FrontendPayload;
   map: any;
-  evaluation: EvaluationReport;
+  evaluation: { status: string; report: EvaluationReport | null };
   prediction: PredictiveOutput;
   advisory: AdvisoryOutput;
 }
 
 export class ModelService {
   private static MAX_BUFFER = 1024 * 1024 * 4; // 4 MiB
+
+  // Python run_pipeline.py writes {"status":"error","code","error_type","message"} as its last stderr line.
+  private static STATUS_BY_CODE: Record<string, number> = {
+    INSUFFICIENT_DATA: 422,
+    NO_ACTIVE_FIRES: 422,
+    WEATHER_RANGE_INSUFFICIENT: 422,
+    NO_VALIDATED_BACKTEST_AVAILABLE: 404,
+    RuntimeError: 502, // upstream data provider (FIRMS / Open-Meteo) failure
+    FileNotFoundError: 500,
+    ValueError: 400,
+  };
+
+  public static toApiError(exitCode: number | null, detail: string): ApiError {
+    const lastLine = detail.split(/\r?\n/).filter(Boolean).pop() || "";
+    try {
+      const parsed = JSON.parse(lastLine);
+      if (parsed && parsed.status === "error") {
+        const status = this.STATUS_BY_CODE[parsed.code] ?? this.STATUS_BY_CODE[parsed.error_type] ?? 500;
+        return new ApiError(status, parsed.code || "MODEL_ERROR", parsed.message || "Model engine failed.");
+      }
+    } catch {
+      // Not structured output (e.g. interpreter crash before main); fall through.
+    }
+    return new ApiError(500, "MODEL_ENGINE_FAILED", `ML Model engine exited with code ${exitCode}: ${detail}`);
+  }
 
   public static async executeRunner(args: string[], envOverrides: Record<string, string> = {}): Promise<string> {
     const pythonExecutable = CONFIG.pythonExecutable;
@@ -45,7 +71,8 @@ export class ModelService {
           resolve(stdout.join("").trim());
         } else {
           const detail = stderr.join("").trim() || stdout.join("").trim();
-          reject(new Error(`ML Model engine exited with code ${code}: ${detail}`));
+          console.error(`ML Model engine exited with code ${code}:`, detail);
+          reject(ModelService.toApiError(code, detail));
         }
       });
     });
@@ -107,6 +134,10 @@ export class ModelService {
     } finally {
       await fs.rm(workingOutputDir, { recursive: true, force: true });
     }
+  }
+
+  public static async getModelConfig(): Promise<any> {
+    return JSON.parse(await this.executeRunner(["data", "--type", "config"]));
   }
 
   public static async getLiveDataSnapshot(): Promise<LiveDataSnapshot> {

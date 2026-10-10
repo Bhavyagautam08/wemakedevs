@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 from datetime import datetime
 import numpy as np
 from src.types import Hotspot, FireCluster
+from src.config import SimulationConfig
 from src.layer1_predictive.coordinates import LocalMetricProjection
 
 
@@ -18,9 +19,49 @@ class FireSourceModel:
     relative smoke emission strength. Pluggable for future ML calibration.
     """
 
-    def __init__(self, cluster_radius_km: float = 12.0, projection: LocalMetricProjection = None):
+    def __init__(
+        self,
+        cluster_radius_km: float = 12.0,
+        projection: LocalMetricProjection = None,
+        config: SimulationConfig = None,
+    ):
         self.cluster_radius_km = cluster_radius_km
         self.projection = projection or LocalMetricProjection()
+        self.config = config or SimulationConfig()
+
+    def _single_linkage_groups(self, hotspots: List[Hotspot]) -> List[List[int]]:
+        """
+        Connected components of the graph linking hotspots <= cluster_radius_km apart
+        (single linkage). Independent of input order. Uses a grid hash so only
+        neighbouring cells are compared.
+        """
+        r = self.cluster_radius_km * 1000.0
+        xs, ys = self.projection.to_metric(
+            np.array([h.latitude for h in hotspots]), np.array([h.longitude for h in hotspots])
+        )
+        parent = list(range(len(hotspots)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+
+        cells: Dict[tuple, List[int]] = {}
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            cells.setdefault((int(x // r), int(y // r)), []).append(i)
+        for (cx, cy), members in cells.items():
+            neighbours = [j for dx in (-1, 0, 1) for dy in (-1, 0, 1) for j in cells.get((cx + dx, cy + dy), [])]
+            for i in members:
+                for j in neighbours:
+                    if j > i and (xs[i] - xs[j]) ** 2 + (ys[i] - ys[j]) ** 2 <= r * r:
+                        parent[find(i)] = find(j)
+
+        groups: Dict[int, List[int]] = {}
+        for i in range(len(hotspots)):
+            groups.setdefault(find(i), []).append(i)
+        # Deterministic order: by earliest detection id within each group
+        return sorted(groups.values(), key=lambda g: min(hotspots[i].detection_id for i in g))
 
     def cluster_hotspots(self, hotspots: List[Hotspot], current_time: datetime = None) -> List[FireCluster]:
         """
@@ -30,25 +71,7 @@ class FireSourceModel:
             return []
 
         now = current_time or datetime.utcnow()
-        clusters: List[List[Hotspot]] = []
-        visited = set()
-
-        # Spatial clustering via neighborhood grouping
-        for i, h1 in enumerate(hotspots):
-            if i in visited:
-                continue
-            current_group = [h1]
-            visited.add(i)
-
-            for j, h2 in enumerate(hotspots):
-                if j in visited:
-                    continue
-                d = self.projection.distance_km(h1.latitude, h1.longitude, h2.latitude, h2.longitude)
-                if d <= self.cluster_radius_km:
-                    current_group.append(h2)
-                    visited.add(j)
-
-            clusters.append(current_group)
+        clusters = [[hotspots[i] for i in g] for g in self._single_linkage_groups(hotspots)]
 
         # Synthesize FireCluster objects
         result: List[FireCluster] = []
@@ -93,12 +116,27 @@ class FireSourceModel:
                     confidence_summary=round(avg_conf, 1),
                     frp_summary=round(total_frp, 1),
                     source_strength=round(source_strength, 3),
+                    emission_rate_kg_s=round(self.estimate_emission_rate(group, now), 4),
                     source_freshness_hours=round(freshness_hours, 2),
                     status="ACTIVE" if freshness_hours < 12.0 else "AGED",
                 )
             )
 
-        return sorted(result, key=lambda c: c.source_strength, reverse=True)
+        return sorted(result, key=lambda c: c.emission_rate_kg_s, reverse=True)
+
+    def estimate_emission_rate(self, group: List[Hotspot], now: datetime) -> float:
+        """
+        PM2.5 emission rate at T0 in kg/s: sum over detections of
+        Ce * FRP_i * exp(-age_i / fire_persistence_efold_hours).
+        """
+        ce = self.config.smoke_emission_coefficient_kg_per_mj
+        tau = self.config.fire_persistence_efold_hours
+        now_naive = now.replace(tzinfo=None)
+        total = 0.0
+        for h in group:
+            age_h = max(0.0, (now_naive - h.acq_timestamp.replace(tzinfo=None)).total_seconds() / 3600.0)
+            total += ce * h.frp * math.exp(-age_h / tau)
+        return total
 
     def estimate_source_strength(
         self, hotspot_count: int, total_frp: float, confidence: float, freshness_hours: float

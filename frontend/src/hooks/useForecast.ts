@@ -1,8 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { DhuanAlertClient } from "../api/client";
 import { FrontendPayload } from "../api/types";
 
-export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
+export function useForecast(
+  client: DhuanAlertClient,
+  initialRunId?: string,
+  initialMode: "live" | "replay" = "live",
+) {
   const [currentRunId, setCurrentRunId] = useState<string | undefined>(initialRunId);
   const [data, setData] = useState<FrontendPayload | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,9 +32,13 @@ export function useForecast(client: DhuanAlertClient, initialRunId?: string) {
     }
   }, [client]);
 
+  // Run once on mount. React StrictMode double-invokes effects in dev, which created two runs.
+  const started = useRef(false);
   useEffect(() => {
-    loadOrCreateForecast(initialRunId, 3, "live");
-  }, [loadOrCreateForecast, initialRunId]);
+    if (started.current) return;
+    started.current = true;
+    loadOrCreateForecast(initialRunId, 3, initialMode);
+  }, [loadOrCreateForecast, initialRunId, initialMode]);
 
   return {
     data,

@@ -123,7 +123,7 @@ export class StorageService {
     }
   }
 
-  public static async getRunEvaluation(runId?: string): Promise<EvaluationReport | null> {
+  public static async getRunEvaluation(runId?: string): Promise<{ status: string; report: EvaluationReport | null } | null> {
     if (runId) {
       if (!RUN_ID_PATTERN.test(runId)) return null;
       const filePath = path.join(this.runsDir, runId, "evaluation_report.json");

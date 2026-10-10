@@ -99,7 +99,7 @@ def main():
             with open(os.path.join(out_dir, "frontend_payload.json"), "w", encoding="utf-8") as f:
                 f.write(result["payload"].model_dump_json(indent=2))
             with open(os.path.join(out_dir, "evaluation_report.json"), "w", encoding="utf-8") as f:
-                f.write(result["evaluation"].model_dump_json(indent=2))
+                json.dump({"status": result["evaluation_status"], "report": None}, f, indent=2)
             print(f"[OK] Exported run files to {out_dir}")
         else:
             print(result["payload"].model_dump_json())
@@ -162,7 +162,11 @@ def main():
         elif args.type == "live-fires":
             print(json.dumps([fire.model_dump(mode="json") for fire in service.get_live_fires()], indent=2))
         elif args.type == "live-weather":
-            print(json.dumps([item.model_dump(mode="json") for item in service.get_live_weather()], indent=2))
+            fires = service.get_live_fires()
+            if not fires:
+                raise ValueError("NO_ACTIVE_FIRES: no fire location to query weather for.")
+            lat, lon = service.primary_fire_location(fires, datetime.now(timezone.utc))
+            print(json.dumps([item.model_dump(mode="json") for item in service.get_live_weather(lat, lon)], indent=2))
         elif args.type == "grap":
             print(json.dumps(service.get_grap_catalog(), indent=2))
         elif args.type == "config":
@@ -170,4 +174,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:  # Surface a machine-readable reason to the caller, never partial output
+        prefix = str(error).split(":", 1)[0]
+        code = prefix if ":" in str(error) and prefix.replace("_", "").isupper() else type(error).__name__
+        sys.stderr.write(json.dumps({"status": "error", "code": code, "error_type": type(error).__name__, "message": str(error)}) + "\n")
+        sys.exit(1)

@@ -36,6 +36,7 @@ class FireCluster(BaseModel):
     confidence_summary: float
     frp_summary: float  # Total FRP in MW
     source_strength: float = Field(..., description="Estimated relative smoke emission strength [0.0 - 1.0]")
+    emission_rate_kg_s: float = Field(0.0, description="PM2.5 emission rate at T0, kg/s (Ce * FRP)")
     source_freshness_hours: float
     status: str = "ACTIVE"
 
@@ -49,7 +50,11 @@ class WeatherObservation(BaseModel):
     boundary_layer_height_m: float
     temperature_c: float
     relative_humidity_pct: Optional[float] = None
+    precipitation_mm: Optional[float] = None  # Hourly accumulated precipitation
     forecast_timestamp: datetime
+    # Grid point the forecast applies to (None = single regional point, spatially uniform field)
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class School(BaseModel):
@@ -109,6 +114,8 @@ class TimelineSlice(BaseModel):
     plume_area_sq_km: float
     affected_schools_count: int
     max_intensity: float
+    peak_concentration_ugm3: Optional[float] = None  # highest 5.5 km grid-cell smoke PM2.5 (nominal member)
+    particle_count: Optional[int] = None
     contour_geojson: Dict[str, Any]
     scatter_points: List[List[float]] = []  # [[lat, lon, weight], ...]
     corridor_geojson: Optional[Dict[str, Any]] = None

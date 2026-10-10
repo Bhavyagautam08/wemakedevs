@@ -15,10 +15,36 @@ from src.types import Hotspot
 
 logger = logging.getLogger("dhuanalert.firms")
 
-# Default bounding box for India
-# Format: [min_lon, min_lat, max_lon, max_lat]
-DEFAULT_NCR_BBOX = "73.5,27.5,78.5,32.5"
-INDIA_BBOX = "68.0,6.0,97.0,37.0"
+# Bounding box of India (mainland), format min_lon,min_lat,max_lon,max_lat. Detections in
+# neighbouring countries inside the box are removed by the India boundary filter.
+INDIA_BBOX = "68.0,6.5,97.5,37.5"
+
+_INDIA_RING = None
+
+
+def _india_ring():
+    """India mainland outer boundary (Natural Earth 1:10m), loaded once."""
+    global _INDIA_RING
+    if _INDIA_RING is None:
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "india_boundary_ne10m.json")
+        with open(path, "r", encoding="utf-8") as f:
+            _INDIA_RING = json.load(f)["ring"]
+    return _INDIA_RING
+
+
+def points_in_india(lats, lons):
+    """Vectorised ray-casting point-in-polygon test against the India boundary ring."""
+    import numpy as np
+
+    ring = np.array(_india_ring())
+    x, y = np.asarray(lons, dtype=float), np.asarray(lats, dtype=float)
+    xi, yi = ring[:-1, 0], ring[:-1, 1]
+    xj, yj = ring[1:, 0], ring[1:, 1]
+    inside = np.zeros(len(x), dtype=bool)
+    for a, b, c, d in zip(xi, yi, xj, yj):
+        crosses = ((b > y) != (d > y)) & (x < (c - a) * (y - b) / ((d - b) if d != b else 1e-12) + a)
+        inside ^= crosses
+    return inside
 
 
 class NasaFirmsClient:
@@ -36,9 +62,11 @@ class NasaFirmsClient:
         bbox: str = INDIA_BBOX,
         days: int = 1,
         source: str = "VIIRS_SNPP_NRT",
+        india_only: bool = True,
     ) -> List[Hotspot]:
         """
-        Fetches live fires for the specified bounding box.
+        Fetches live fires for the specified bounding box. With india_only (default), detections
+        outside India's boundary (e.g. Pakistani Punjab, which the corridor bbox overlaps) are dropped.
         Live requests never fall back to a bundled snapshot.
         """
         if not self.map_key or self.map_key.upper() in ("MOCK", "SAMPLE", "YOUR_NASA_FIRMS_MAP_KEY", ""):
@@ -59,7 +87,13 @@ class NasaFirmsClient:
         except (urllib.error.URLError, TimeoutError) as error:
             raise RuntimeError("NASA FIRMS request failed due to a network error or timeout.") from None
 
-        return self._parse_csv_response(content)
+        hotspots = self._parse_csv_response(content)
+        if india_only and hotspots:
+            keep = points_in_india([h.latitude for h in hotspots], [h.longitude for h in hotspots])
+            dropped = len(hotspots) - int(keep.sum())
+            hotspots = [h for h, k in zip(hotspots, keep) if k]
+            logger.info("Kept %d FIRMS detections inside India, dropped %d outside.", len(hotspots), dropped)
+        return hotspots
 
     def _parse_csv_response(self, csv_text: str) -> List[Hotspot]:
         """Parses NASA FIRMS CSV response into Hotspot models."""
@@ -110,7 +144,7 @@ class NasaFirmsClient:
         """Loads bundled reference dataset for offline / sample mode."""
         data_path = os.path.join(os.path.dirname(__file__), "..", "data", "sample_fires.json")
         if not os.path.exists(data_path):
-            return []
+            raise FileNotFoundError(f"Replay fire snapshot missing: {os.path.abspath(data_path)}")
         with open(data_path, "r", encoding="utf-8") as f:
             raw = json.load(f)
         return [Hotspot(**h) for h in raw]

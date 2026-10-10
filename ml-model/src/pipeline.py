@@ -33,10 +33,11 @@ class DhuanAlertPipeline:
         self,
         hotspots: List[Hotspot],
         weather: List[WeatherObservation],
-        schools: List[School],
+        schools: Optional[List[School]] = None,
         grap_stage: int = 3,
         human_approved: bool = True,
         run_timestamp: Optional[datetime] = None,
+        school_provider=None,
     ) -> FrontendPayload:
         """
         Executes both layers sequentially and produces the complete frontend contract.
@@ -47,6 +48,7 @@ class DhuanAlertPipeline:
             weather=weather,
             schools=schools,
             run_timestamp=run_timestamp,
+            school_provider=school_provider,
         )
 
         # Step 2: Execute Layer 2 (Generative AI / Policy-Gated Advisory)
