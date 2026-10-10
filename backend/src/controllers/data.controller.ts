@@ -46,7 +46,7 @@ export class DataController {
       projection: { origin_lat: 29.5, origin_lon: 76.5 },
       simulation: {
         timestep_seconds: 900,
-        horizon_hours: 6,
+        horizon_hours: 9,
         particle_count_per_fire: 500,
         base_diffusion_kx: 250.0,
         base_diffusion_ky: 250.0,

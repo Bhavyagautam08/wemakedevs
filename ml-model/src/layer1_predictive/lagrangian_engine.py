@@ -25,6 +25,10 @@ class ParticleState:
     def __len__(self):
         return len(self.x)
 
+    def copy(self) -> "ParticleState":
+        """Checkpoint particle state before the next in-place simulation step."""
+        return ParticleState(self.x.copy(), self.y.copy(), self.mass.copy(), self.initial_mass.copy())
+
 
 class LagrangianTransportEngine:
     """

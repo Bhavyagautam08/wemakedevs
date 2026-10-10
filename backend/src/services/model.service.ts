@@ -13,6 +13,17 @@ export interface ModelPipelineResult {
   advisory: AdvisoryOutput;
 }
 
+export class ModelRunnerError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    public readonly code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ModelRunnerError";
+  }
+}
+
 export class ModelService {
   private static MAX_BUFFER = 1024 * 1024 * 4; // 4 MiB
 
@@ -45,10 +56,40 @@ export class ModelService {
           resolve(stdout.join("").trim());
         } else {
           const detail = stderr.join("").trim() || stdout.join("").trim();
-          reject(new Error(`ML Model engine exited with code ${code}: ${detail}`));
+          reject(this.toRunnerError(code, detail));
         }
       });
     });
+  }
+
+  private static toRunnerError(exitCode: number | null, detail: string): Error {
+    try {
+      const structured = JSON.parse(detail) as { status?: string; code?: string; message?: string };
+      if (structured.status === "error" && structured.code && structured.message) {
+        const clientInputCodes = new Set([
+          "MISSING_SIMULATION_INPUT",
+          "UNSUPPORTED_MODE",
+          "WEATHER_LOCATION_REQUIRED",
+          "WEATHER_LOCATION_INVALID",
+          "WEATHER_COVERAGE_ERROR",
+          "OPEN_METEO_SCHEMA_ERROR",
+          "LIVE_FIRE_DATA_EMPTY",
+        ]);
+        return new ModelRunnerError(
+          clientInputCodes.has(structured.code) ? 422 : 502,
+          structured.code,
+          structured.message,
+        );
+      }
+    } catch {
+      // Non-JSON stderr is preserved below as a diagnostic, not replaced.
+    }
+
+    return new ModelRunnerError(
+      502,
+      "MODEL_RUNNER_FAILED",
+      `ML Model engine exited with code ${exitCode}: ${detail}`,
+    );
   }
 
   public static async runForecast(request: CreateRunRequest): Promise<ModelPipelineResult> {

@@ -16,11 +16,6 @@ from src.types import WeatherObservation
 
 logger = logging.getLogger("dhuanalert.weather")
 
-# Delhi-NCR Reference Coordinates (Safdarjung / Central NCR)
-DEFAULT_LAT = 28.6139
-DEFAULT_LON = 77.2090
-
-
 class OpenMeteoClient:
     """
     Client for Open-Meteo GFS atmospheric forecast API.
@@ -32,14 +27,21 @@ class OpenMeteoClient:
 
     def fetch_forecast(
         self,
-        latitude: float = DEFAULT_LAT,
-        longitude: float = DEFAULT_LON,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
         forecast_days: int = 2,
     ) -> List[WeatherObservation]:
         """
         Fetches hourly GFS meteorological vectors.
         Live requests never fall back to a bundled snapshot.
         """
+        if latitude is None or longitude is None:
+            raise ValueError(
+                "WEATHER_LOCATION_REQUIRED: live weather requests require the fire-cluster latitude and longitude."
+            )
+        if not -90.0 <= latitude <= 90.0 or not -180.0 <= longitude <= 180.0:
+            raise ValueError("WEATHER_LOCATION_INVALID: latitude or longitude is outside the valid geographic range.")
+
         params = (
             f"?latitude={latitude}&longitude={longitude}"
             "&hourly=wind_speed_10m,wind_direction_10m,boundary_layer_height,temperature_2m,relative_humidity_2m"
@@ -64,13 +66,43 @@ class OpenMeteoClient:
 
     def _parse_response(self, data: dict) -> List[WeatherObservation]:
         """Parses Open-Meteo JSON into WeatherObservation vector objects."""
-        hourly = data.get("hourly", {})
-        times = hourly.get("time", [])
-        speeds = hourly.get("wind_speed_10m", [])
-        dirs = hourly.get("wind_direction_10m", [])
-        blhs = hourly.get("boundary_layer_height", [])
-        temps = hourly.get("temperature_2m", [])
-        rhs = hourly.get("relative_humidity_2m", [])
+        hourly = data.get("hourly")
+        if not isinstance(hourly, dict):
+            raise ValueError("OPEN_METEO_SCHEMA_ERROR: response does not contain an hourly weather object.")
+
+        series = {
+            "time": hourly.get("time"),
+            "wind_speed_10m": hourly.get("wind_speed_10m"),
+            "wind_direction_10m": hourly.get("wind_direction_10m"),
+            "boundary_layer_height": hourly.get("boundary_layer_height"),
+            "temperature_2m": hourly.get("temperature_2m"),
+            "relative_humidity_2m": hourly.get("relative_humidity_2m"),
+        }
+        invalid_series = [name for name, values in series.items() if not isinstance(values, list)]
+        if invalid_series:
+            raise ValueError(
+                "OPEN_METEO_SCHEMA_ERROR: hourly response is missing array fields: "
+                f"{', '.join(invalid_series)}."
+            )
+
+        times = series["time"]
+        expected_length = len(times)
+        inconsistent_series = [
+            name for name, values in series.items() if len(values) != expected_length
+        ]
+        if inconsistent_series:
+            raise ValueError(
+                "OPEN_METEO_SCHEMA_ERROR: hourly response arrays have inconsistent lengths: "
+                f"{', '.join(inconsistent_series)}."
+            )
+        if not times:
+            raise ValueError("OPEN_METEO_SCHEMA_ERROR: hourly response contains no observations.")
+
+        speeds = series["wind_speed_10m"]
+        dirs = series["wind_direction_10m"]
+        blhs = series["boundary_layer_height"]
+        temps = series["temperature_2m"]
+        rhs = series["relative_humidity_2m"]
 
         observations: List[WeatherObservation] = []
 
@@ -105,12 +137,10 @@ class OpenMeteoClient:
                         relative_humidity_pct=rh,
                     )
                 )
-            except (IndexError, TypeError, ValueError) as e:
-                logger.debug(f"Skipping malformed weather index {i}: {e}")
-                continue
-
-        if not observations:
-            raise ValueError("Open-Meteo returned no valid hourly weather observations.")
+            except (TypeError, ValueError) as error:
+                raise ValueError(
+                    f"OPEN_METEO_SCHEMA_ERROR: malformed hourly observation at index {i}: {error}"
+                ) from error
 
         logger.info(f"Successfully ingested {len(observations)} hourly weather forecast vectors from Open-Meteo.")
         return observations

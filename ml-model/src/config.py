@@ -38,7 +38,7 @@ class ProjectionConfig(BaseModel):
 class SimulationConfig(BaseModel):
     """2D Lagrangian particle transport & diffusion parameters."""
     timestep_seconds: int = 900          # 15 minutes (dt)
-    horizon_hours: int = 6               # 6-hour forecast horizon
+    horizon_hours: int = 9               # T+3h, T+6h, and T+9h forecast checkpoints
     particle_count_per_fire: int = 500   # Scalable virtual particles
     base_diffusion_kx: float = 250.0     # Horizontal diffusivity m^2/s
     base_diffusion_ky: float = 250.0     # Horizontal diffusivity m^2/s

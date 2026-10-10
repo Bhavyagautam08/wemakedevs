@@ -84,49 +84,61 @@ class GaussianDiffusionField:
         scaled = np.clip(raw_val * 450.0, 0.0, 1.0)
         return float(round(scaled, 3))
 
+    def _coverage_hull(self, particles: ParticleState, coverage_fraction: float) -> np.ndarray:
+        """Return the convex hull of the requested mass-weighted particle-cloud coverage."""
+        if not 0.0 < coverage_fraction <= 1.0:
+            raise ValueError("CONTOUR_CONFIGURATION_ERROR: coverage_fraction must be in (0, 1].")
+        if len(particles) < 3 or float(np.sum(particles.mass)) <= 0.0:
+            return np.empty((0, 2))
+
+        center_x = float(np.average(particles.x, weights=particles.mass))
+        center_y = float(np.average(particles.y, weights=particles.mass))
+        radius_sq = (particles.x - center_x) ** 2 + (particles.y - center_y) ** 2
+        radius_limit = float(np.quantile(radius_sq, coverage_fraction))
+        selected = np.column_stack((particles.x[radius_sq <= radius_limit], particles.y[radius_sq <= radius_limit]))
+        points = sorted({(float(x), float(y)) for x, y in selected})
+        if len(points) < 3:
+            return np.empty((0, 2))
+
+        def cross(origin, point_a, point_b):
+            return (
+                (point_a[0] - origin[0]) * (point_b[1] - origin[1])
+                - (point_a[1] - origin[1]) * (point_b[0] - origin[0])
+            )
+
+        lower, upper = [], []
+        for point in points:
+            while len(lower) >= 2 and cross(lower[-2], lower[-1], point) <= 0:
+                lower.pop()
+            lower.append(point)
+        for point in reversed(points):
+            while len(upper) >= 2 and cross(upper[-2], upper[-1], point) <= 0:
+                upper.pop()
+            upper.append(point)
+        return np.asarray(lower[:-1] + upper[:-1], dtype=np.float64)
+
     def extract_contour_geojson(
         self,
         particles: ParticleState,
-        threshold: float = 0.25,
-        horizon_hours: int = 3,
+        coverage_fraction: float = 0.90,
     ) -> Dict[str, Any]:
-        """
-        Extracts a convex/envelope polygon around active plume particles for map display.
-        """
-        if len(particles) < 5:
-            return {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": []}, "properties": {}}
+        """Build a plume polygon from actual particle positions, never a bounding rectangle."""
+        hull = self._coverage_hull(particles, coverage_fraction)
+        if len(hull) < 3:
+            return {"type": "Polygon", "coordinates": []}
 
-        # Sample particle envelope
-        step = max(1, len(particles) // 200)
-        sample_x = particles.x[::step]
-        sample_y = particles.y[::step]
+        lats, lons = self.projection.to_wgs84(hull[:, 0], hull[:, 1])
+        coordinates = [[round(float(lon), 6), round(float(lat), 6)] for lat, lon in zip(lats, lons)]
+        coordinates.append(coordinates[0])
+        return {"type": "Polygon", "coordinates": [coordinates]}
 
-        # Convert boundary particles back to WGS84
-        lats, lons = self.projection.to_wgs84(sample_x, sample_y)
-
-        # Compute simple bounding envelope
-        min_lon, max_lon = float(np.min(lons)), float(np.max(lons))
-        min_lat, max_lat = float(np.min(lats)), float(np.max(lats))
-
-        # Add polygon coordinates
-        coords = [
-            [round(min_lon, 4), round(min_lat, 4)],
-            [round(max_lon, 4), round(min_lat, 4)],
-            [round(max_lon, 4), round(max_lat, 4)],
-            [round(min_lon, 4), round(max_lat, 4)],
-            [round(min_lon, 4), round(min_lat, 4)],
-        ]
-
-        return {
-            "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [coords],
-            },
-            "properties": {
-                "layer_type": "plume_contour",
-                "horizon_hours": horizon_hours,
-                "particle_count": len(particles),
-                "threshold": threshold,
-            },
-        }
+    def plume_area_sq_km(self, particles: ParticleState, coverage_fraction: float = 0.90) -> float:
+        """Calculate the displayed particle-hull footprint in square kilometres."""
+        hull = self._coverage_hull(particles, coverage_fraction)
+        if len(hull) < 3:
+            return 0.0
+        x_coords, y_coords = hull[:, 0], hull[:, 1]
+        area_m2 = 0.5 * abs(
+            np.dot(x_coords, np.roll(y_coords, -1)) - np.dot(y_coords, np.roll(x_coords, -1))
+        )
+        return round(float(area_m2 / 1_000_000.0), 2)

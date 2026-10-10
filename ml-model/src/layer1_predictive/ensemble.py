@@ -4,6 +4,7 @@ Executes physically plausible scenario perturbations (wind speed, wind direction
 BLH trapping, emission strength) and computes scenario overlap probabilities.
 """
 
+from datetime import datetime
 from typing import List, Dict, Any, Tuple
 import numpy as np
 from src.types import (
@@ -37,16 +38,25 @@ class ScenarioEnsembleRunner:
         self,
         fires: List[FireCluster],
         weather_obs: List[WeatherObservation],
-        horizon_hours: int = 6,
+        simulation_start_time: datetime,
+        horizon_hours: int = 9,
         dt_seconds: int = 900,
-    ) -> Tuple[List[ParticleState], EnsembleOutput]:
+    ) -> Tuple[List[ParticleState], EnsembleOutput, Dict[int, List[ParticleState]]]:
         """
         Runs all ensemble members forward through time to the forecast horizon.
         """
-        weather_field = WeatherVectorField(weather_obs)
+        weather_field = WeatherVectorField(
+            weather_obs,
+            simulation_start_time=simulation_start_time,
+            projection=self.engine.projection,
+        )
         total_steps = int((horizon_hours * 3600) / dt_seconds)
+        weather_field.ensure_coverage(horizon_hours * 3600)
 
         final_particles: List[ParticleState] = []
+        particle_snapshots: Dict[int, List[ParticleState]] = {
+            hour: [] for hour in range(horizon_hours + 1)
+        }
         member_summaries: List[EnsembleMemberSummary] = []
 
         all_lats, all_lons = [], []
@@ -57,6 +67,7 @@ class ScenarioEnsembleRunner:
                 fires=fires,
                 source_multiplier=m_cfg.source_strength_multiplier,
             )
+            particle_snapshots[0].append(p_state.copy())
 
             # 2. Time-step simulation
             for step in range(total_steps):
@@ -71,6 +82,9 @@ class ScenarioEnsembleRunner:
                     blh_factor=m_cfg.blh_multiplier,
                     diff_factor=m_cfg.diffusion_multiplier,
                 )
+                completed_seconds = (step + 1) * dt_seconds
+                if completed_seconds % 3600 == 0:
+                    particle_snapshots[completed_seconds // 3600].append(p_state.copy())
 
             final_particles.append(p_state)
 
@@ -122,7 +136,7 @@ class ScenarioEnsembleRunner:
             },
         )
 
-        return final_particles, ensemble_output
+        return final_particles, ensemble_output, particle_snapshots
 
     def evaluate_location_impact(
         self,

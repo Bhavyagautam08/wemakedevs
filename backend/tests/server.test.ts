@@ -98,6 +98,18 @@ test("POST /v1/claims/validate classifies factual statements", async () => {
   assert.equal(((await unsafeResp.json()) as any).is_valid, false);
 });
 
+test("POST /v1/runs exposes replay weather coverage failures without a fallback", async () => {
+  const response = await fetch(`${baseUrl}/v1/runs`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ mode: "replay", snapshot_id: "sample" }),
+  });
+
+  assert.equal(response.status, 422);
+  const data = (await response.json()) as any;
+  assert.equal(data.error.code, "WEATHER_COVERAGE_ERROR");
+});
+
 test("GET /v1/evaluation returns evaluation report", async () => {
   const response = await fetch(`${baseUrl}/v1/evaluation`);
   assert.equal(response.status, 200);
