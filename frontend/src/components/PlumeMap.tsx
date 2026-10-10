@@ -127,25 +127,52 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
       layerGroup.addLayer(corridorLine);
     }
 
-    // 3. Render the actual particle-cloud hull returned by the simulation.
-    if (showHeatmap && currentSlice?.contour_geojson?.coordinates?.[0]) {
-      const latLngs: [number, number][] = currentSlice.contour_geojson.coordinates[0].map(
-        (coordinate: number[]) => [coordinate[1], coordinate[0]]
-      );
-      const poly = L.polygon(latLngs, {
-        color: "#f97316",
-        weight: 2,
-        fillColor: "#f97316",
-        fillOpacity: 0.35,
-      }).bindPopup(`
-        <div class="map-popup plume-popup">
-          <div class="popup-title">🌫️ Simulated Particle-Cloud Footprint</div>
-          <div class="popup-row"><span>Forecast Horizon:</span> <b>T+${currentSlice.horizon_offset_hours} Hours</b></div>
-          <div class="popup-row"><span>Plume Footprint:</span> <b>${Math.round(currentSlice.plume_area_sq_km)} km²</b></div>
-          <div class="popup-row"><span>Remaining Particle Mass:</span> <b>${(currentSlice.max_intensity * 100).toFixed(0)}%</b></div>
-        </div>
-      `);
-      layerGroup.addLayer(poly);
+    // 3. Render Multi-Level Plume Heatmap Contours
+    if (showHeatmap && currentSlice) {
+      if (currentSlice.heatmap_levels && currentSlice.heatmap_levels.length > 0) {
+        // Render from outermost fringe to core
+        [...currentSlice.heatmap_levels].reverse().forEach((level) => {
+          const latLngs: [number, number][] = level.coordinates.map((coord: number[]) => [
+            coord[1],
+            coord[0],
+          ]);
+
+          const opacity =
+            level.level === "core" ? 0.65 : level.level === "dispersing" ? 0.45 : 0.25;
+          const fillOpacity =
+            level.level === "core" ? 0.45 : level.level === "dispersing" ? 0.28 : 0.15;
+
+          const poly = L.polygon(latLngs, {
+            color: level.color,
+            weight: 2,
+            opacity,
+            fillColor: level.color,
+            fillOpacity,
+            smoothFactor: 1.5,
+          }).bindPopup(`
+            <div class="map-popup plume-popup">
+              <div class="popup-title">🌫️ Smoke Plume (${level.level.toUpperCase()})</div>
+              <div class="popup-row"><span>Forecast Horizon:</span> <b>T+${currentSlice.horizon_offset_hours} Hours</b></div>
+              <div class="popup-row"><span>Plume Footprint:</span> <b>${Math.round(currentSlice.plume_area_sq_km)} km²</b></div>
+              <div class="popup-row"><span>Max Intensity:</span> <b>${(currentSlice.max_intensity * 100).toFixed(0)}%</b></div>
+              <div class="popup-tag" style="background: ${level.color}; color: #fff;">${level.intensity.toUpperCase()} DENSITY</div>
+            </div>
+          `);
+          layerGroup.addLayer(poly);
+        });
+      } else if (currentSlice.contour_geojson?.coordinates) {
+        // Fallback polygon
+        const latLngs: [number, number][] = currentSlice.contour_geojson.coordinates[0].map(
+          (c: number[]) => [c[1], c[0]]
+        );
+        const poly = L.polygon(latLngs, {
+          color: "#f97316",
+          weight: 2,
+          fillColor: "#f97316",
+          fillOpacity: 0.35,
+        });
+        layerGroup.addLayer(poly);
+      }
     }
 
     // 4. Render Particle Scatter Cloud
@@ -244,7 +271,7 @@ export const PlumeMap: React.FC<PlumeMapProps> = ({
             <b>Interactive Lagrangian Smoke Corridor Map</b>
           </div>
           <small className="map-data-disclosure">
-            Particle positions and plume footprint are produced by the active simulation.
+            Sample plume outlines and particle scatter are illustrative model visualizations.
           </small>
 
           {/* Quick Horizon Buttons */}

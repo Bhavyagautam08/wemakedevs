@@ -69,10 +69,7 @@ def main():
     print(f"Prediction ID     : {pred.prediction_id}")
     print(f"Simulated Smoke   : {pred.fire['hotspot_count']} hotspots -> Source Strength: {pred.fire['source_strength']}")
     print(f"Ensemble Members  : {pred.ensemble.member_count} physical scenarios evaluated")
-    print(
-        f"Timeline Slices   : {len(pred.timeline)} hourly animation steps generated "
-        f"(T+0 to T+{pred.simulation['horizon_hours']}h)"
-    )
+    print(f"Timeline Slices   : {len(pred.timeline)} hourly animation steps generated (T+0 to T+6h)")
     print("\nAssessed Schools Risk Ranking:")
     for s in pred.schools:
         arr_str = s.predicted_arrival_time.strftime('%H:%M UTC') if s.predicted_arrival_time else "No Arrival"

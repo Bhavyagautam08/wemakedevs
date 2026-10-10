@@ -78,55 +78,29 @@ class DhuanAlertService:
     def get_live_fires(self) -> List[Hotspot]:
         return self.firms_client.fetch_active_fires()
 
-    def get_live_weather(self, hotspots: List[Hotspot]) -> List[WeatherObservation]:
-        """Fetch weather at the strongest detected fire cluster; never use a fixed city default."""
-        if not hotspots:
-            raise ValueError(
-                "WEATHER_LOCATION_REQUIRED: live weather requires at least one active fire detection."
-            )
-        clusters = self.layer1.source_model.cluster_hotspots(
-            hotspots,
-            current_time=datetime.now(timezone.utc),
-        )
-        if not clusters:
-            raise ValueError(
-                "WEATHER_LOCATION_REQUIRED: no fire cluster could be derived from live fire detections."
-            )
-        primary_cluster = clusters[0]
-        return self.weather_client.fetch_forecast(
-            latitude=primary_cluster.weighted_centroid["lat"],
-            longitude=primary_cluster.weighted_centroid["lon"],
-        )
+    def get_live_weather(self) -> List[WeatherObservation]:
+        return self.weather_client.fetch_forecast()
 
     def get_live_data_snapshot(self) -> Dict[str, Any]:
         """Return only records fetched successfully from live data providers."""
         sources: Dict[str, Dict[str, Any]] = {}
         records: Dict[str, List[Dict[str, Any]]] = {"fires": [], "weather": []}
 
-        try:
-            fires = self.get_live_fires()
-            records["fires"] = [item.model_dump(mode="json") for item in fires]
-            sources["fires"] = {"name": "NASA FIRMS", "status": "ok", "count": len(fires)}
-        except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
-            fires = []
-            sources["fires"] = {
-                "name": "NASA FIRMS",
-                "status": "error",
-                "count": 0,
-                "error": str(error),
-            }
-
-        try:
-            weather = self.get_live_weather(fires)
-            records["weather"] = [item.model_dump(mode="json") for item in weather]
-            sources["weather"] = {"name": "Open-Meteo", "status": "ok", "count": len(weather)}
-        except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
-            sources["weather"] = {
-                "name": "Open-Meteo",
-                "status": "error",
-                "count": 0,
-                "error": str(error),
-            }
+        for name, fetch, target in (
+            ("NASA FIRMS", self.get_live_fires, "fires"),
+            ("Open-Meteo", self.get_live_weather, "weather"),
+        ):
+            try:
+                fetched = fetch()
+                records[target] = [item.model_dump(mode="json") for item in fetched]
+                sources[target] = {"name": name, "status": "ok", "count": len(fetched)}
+            except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
+                sources[target] = {
+                    "name": name,
+                    "status": "error",
+                    "count": 0,
+                    "error": str(error),
+                }
 
         return {
             "fetched_at": datetime.now(timezone.utc).isoformat(),
@@ -165,37 +139,17 @@ class DhuanAlertService:
         Executes complete forecast pipeline and computes evaluation matrix.
         Supports 'replay' (bundled snapshot), 'live' (NASA FIRMS + Open-Meteo), or 'custom'.
         """
-        if mode not in {"live", "replay", "custom"}:
-            raise ValueError("UNSUPPORTED_MODE: mode must be 'live', 'replay', or 'custom'.")
-
-        supplied_inputs = {"hotspots": hotspots, "weather": weather, "schools": schools}
-        supplied_names = [name for name, value in supplied_inputs.items() if value is not None]
-        missing_names = [name for name, value in supplied_inputs.items() if value is None]
-
         if mode == "live":
-            if hotspots is None:
-                hotspots = self.get_live_fires()
+            hotspots = hotspots or self.get_live_fires()
+            weather = weather or self.get_live_weather()
+            schools = schools or self.get_sample_schools()
+        else:
             if not hotspots:
-                raise ValueError("LIVE_FIRE_DATA_EMPTY: NASA FIRMS returned no active fire detections.")
-            if weather is None:
-                weather = self.get_live_weather(hotspots)
-            if schools is None:
-                raise ValueError("MISSING_SIMULATION_INPUT: live runs require an explicit schools dataset.")
-        elif mode == "replay":
-            if supplied_names and missing_names:
-                raise ValueError(
-                    "MISSING_SIMULATION_INPUT: replay overrides must supply hotspots, weather, and schools together; "
-                    f"missing {', '.join(missing_names)}."
-                )
-            if not supplied_names:
                 hotspots = self.get_sample_fires()
+            if not weather:
                 weather = self.get_sample_weather()
+            if not schools:
                 schools = self.get_sample_schools()
-        elif missing_names:
-            raise ValueError(
-                "MISSING_SIMULATION_INPUT: custom runs require hotspots, weather, and schools; "
-                f"missing {', '.join(missing_names)}."
-            )
 
         now = run_timestamp or datetime.now(timezone.utc)
         payload: FrontendPayload = self.pipeline.run(
@@ -228,13 +182,12 @@ class DhuanAlertService:
         schools: Optional[List[School]] = None,
         run_timestamp: Optional[datetime] = None,
     ) -> PredictiveOutput:
-        supplied_inputs = {"hotspots": hotspots, "weather": weather, "schools": schools}
-        missing_names = [name for name, value in supplied_inputs.items() if not value]
-        if missing_names:
-            raise ValueError(
-                "MISSING_SIMULATION_INPUT: simulation requires explicit non-empty hotspots, weather, and schools; "
-                f"missing {', '.join(missing_names)}."
-            )
+        if not hotspots:
+            hotspots = self.get_sample_fires()
+        if not weather:
+            weather = self.get_sample_weather()
+        if not schools:
+            schools = self.get_sample_schools()
 
         return self.layer1.run(
             hotspots=hotspots,

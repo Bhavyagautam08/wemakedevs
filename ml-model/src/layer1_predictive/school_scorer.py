@@ -35,7 +35,7 @@ class SchoolRiskScorer:
         ensemble_runner: ScenarioEnsembleRunner,
         final_particles: List[ParticleState],
         sim_start_time: datetime,
-        horizon_hours: int = 9,
+        horizon_hours: int = 6,
     ) -> List[SchoolRiskAssessment]:
         """
         Assesses each school against the ensemble plume predictions.

@@ -12,7 +12,7 @@ export class ApiError extends Error {
 }
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-  if (err instanceof ApiError || (Number.isInteger(err?.statusCode) && typeof err?.code === "string")) {
+  if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
       error: { code: err.code, message: err.message },
     });

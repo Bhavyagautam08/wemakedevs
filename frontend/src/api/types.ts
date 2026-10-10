@@ -75,6 +75,12 @@ export interface TimelineSlice {
   contour_geojson?: any;
   scatter_points?: Array<[number, number, number]>; // [lat, lon, weight]
   corridor_geojson?: any;
+  heatmap_levels?: Array<{
+    level: string;
+    intensity: string;
+    color: string;
+    coordinates: number[][];
+  }>;
 }
 
 export interface PredictiveOutput {

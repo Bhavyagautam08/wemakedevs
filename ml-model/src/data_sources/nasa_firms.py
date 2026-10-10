@@ -15,9 +15,10 @@ from src.types import Hotspot
 
 logger = logging.getLogger("dhuanalert.firms")
 
-# Default bounding box for the Punjab–Haryana–Delhi smoke corridor.
+# Default bounding box for India
 # Format: [min_lon, min_lat, max_lon, max_lat]
-DEFAULT_NW_CORRIDOR_BBOX = "73.5,27.5,78.5,32.5"
+DEFAULT_NCR_BBOX = "73.5,27.5,78.5,32.5"
+INDIA_BBOX = "68.0,6.0,97.0,37.0"
 
 
 class NasaFirmsClient:
@@ -32,7 +33,7 @@ class NasaFirmsClient:
 
     def fetch_active_fires(
         self,
-        bbox: str = DEFAULT_NW_CORRIDOR_BBOX,
+        bbox: str = INDIA_BBOX,
         days: int = 1,
         source: str = "VIIRS_SNPP_NRT",
     ) -> List[Hotspot]:

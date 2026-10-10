@@ -162,8 +162,7 @@ def main():
         elif args.type == "live-fires":
             print(json.dumps([fire.model_dump(mode="json") for fire in service.get_live_fires()], indent=2))
         elif args.type == "live-weather":
-            fires = service.get_live_fires()
-            print(json.dumps([item.model_dump(mode="json") for item in service.get_live_weather(fires)], indent=2))
+            print(json.dumps([item.model_dump(mode="json") for item in service.get_live_weather()], indent=2))
         elif args.type == "grap":
             print(json.dumps(service.get_grap_catalog(), indent=2))
         elif args.type == "config":
@@ -171,13 +170,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except (OSError, RuntimeError, ValueError, TypeError, KeyError, IndexError) as error:
-        message = str(error)
-        error_code = message.split(":", 1)[0] if ":" in message else "PIPELINE_INPUT_ERROR"
-        print(
-            json.dumps({"status": "error", "code": error_code, "message": message}),
-            file=sys.stderr,
-        )
-        raise SystemExit(2)
+    main()
